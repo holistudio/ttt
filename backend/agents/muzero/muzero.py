@@ -184,12 +184,9 @@ class MuZeroAgent(object):
     """
     MuZero agent class
     """
-    def __init__(self, environment, config, load=False, load_dir=None):
-        self.env = environment
-        self.observation_space = self.flatten(environment.observation_space('player_1'))
-        self.obs_size = self.observation_space.shape
-        self.action_space = environment.action_space('player_1')
-        self.action_size = self.action_space.n
+    def __init__(self, config, load=False, load_dir=None):
+        self.obs_size = torch.Size([9])
+        self.action_size = 9
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # neural networks
@@ -241,8 +238,7 @@ class MuZeroAgent(object):
         """
         load neural network and optimizer parameters
 
-        filepath: directory containing the saved params, relative to this
-        file's directory (e.g. 'results/04'). defaults to this file's directory.
+        filepath: directory containing the saved params
         """
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
