@@ -30,7 +30,15 @@ async function postReset(): Promise<GameState> {
 
 function render(): void {
   const boardEl = document.getElementById("board") as HTMLDivElement;
+  const overlayEl = document.getElementById("game-over") as HTMLDivElement;
+  const overlayTitleEl = document.getElementById("game-over-title") as HTMLHeadingElement;
+
   boardEl.classList.toggle("over", state.over);
+  overlayEl.classList.toggle("hidden", !state.over);
+
+  if (state.over) {
+    overlayTitleEl.textContent = state.winner ? `${state.winner} Wins!` : "Draw";
+  }
 
   for (let i = 0; i < 9; i++) {
     const existing = boardEl.querySelector<HTMLImageElement>(`.piece[data-idx="${i}"]`);
@@ -55,15 +63,15 @@ function render(): void {
 }
 
 async function handleCellClick(index: number): Promise<void> {
-  if (state.over) {
-    state = await postReset();
-    render();
-    return;
-  }
-  if (state.board[index]) {
+  if (state.over || state.board[index]) {
     return;
   }
   state = await postMove(index);
+  render();
+}
+
+async function handleReset(): Promise<void> {
+  state = await postReset();
   render();
 }
 
@@ -75,6 +83,10 @@ async function init(): Promise<void> {
     cell.addEventListener("click", () => handleCellClick(i));
     boardEl.appendChild(cell);
   }
+
+  document.getElementById("new-game")?.addEventListener("click", handleReset);
+  document.getElementById("play-again")?.addEventListener("click", handleReset);
+
   state = await fetchState();
   render();
 }

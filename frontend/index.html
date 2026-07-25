@@ -7,7 +7,21 @@
   <link rel="stylesheet" href="static/css/style.css" />
 </head>
 <body>
-  <div id="board" class="board"></div>
+  <div class="app">
+    <header class="topbar">
+      <h1 class="title">tic tac toe</h1>
+      <button id="new-game" class="btn">New Game</button>
+    </header>
+
+    <div class="board-wrap">
+      <div id="board" class="board"></div>
+
+      <div id="game-over" class="overlay hidden">
+        <h2 id="game-over-title" class="overlay-title">Game Over</h2>
+        <button id="play-again" class="btn btn-play-again">Play Again</button>
+      </div>
+    </div>
+  </div>
   <script src="static/js/main.js"></script>
 </body>
 </html>

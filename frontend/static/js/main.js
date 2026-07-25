@@ -18,7 +18,13 @@ async function postReset() {
 }
 function render() {
     const boardEl = document.getElementById("board");
+    const overlayEl = document.getElementById("game-over");
+    const overlayTitleEl = document.getElementById("game-over-title");
     boardEl.classList.toggle("over", state.over);
+    overlayEl.classList.toggle("hidden", !state.over);
+    if (state.over) {
+        overlayTitleEl.textContent = state.winner ? `${state.winner} Wins!` : "Draw";
+    }
     for (let i = 0; i < 9; i++) {
         const existing = boardEl.querySelector(`.piece[data-idx="${i}"]`);
         const mark = state.board[i];
@@ -40,15 +46,14 @@ function render() {
     }
 }
 async function handleCellClick(index) {
-    if (state.over) {
-        state = await postReset();
-        render();
-        return;
-    }
-    if (state.board[index]) {
+    if (state.over || state.board[index]) {
         return;
     }
     state = await postMove(index);
+    render();
+}
+async function handleReset() {
+    state = await postReset();
     render();
 }
 async function init() {
@@ -59,6 +64,8 @@ async function init() {
         cell.addEventListener("click", () => handleCellClick(i));
         boardEl.appendChild(cell);
     }
+    document.getElementById("new-game")?.addEventListener("click", handleReset);
+    document.getElementById("play-again")?.addEventListener("click", handleReset);
     state = await fetchState();
     render();
 }

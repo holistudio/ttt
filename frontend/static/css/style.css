@@ -11,8 +11,49 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: #f6f1e7;
   font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.topbar {
+  width: 594px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #6b5c4f;
+  text-transform: capitalize;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  background: #8f7d6e;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #7c6c5f;
+}
+
+.board-wrap {
+  position: relative;
 }
 
 .board {
@@ -31,6 +72,33 @@ body {
 
 .board.over {
   opacity: 0.5;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  text-align: center;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-title {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 700;
+  color: #6b5c4f;
+}
+
+.btn-play-again {
+  padding: 16px 32px;
+  font-size: 18px;
 }
 
 .cell {
