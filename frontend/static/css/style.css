@@ -32,7 +32,7 @@ body {
 .btn {
   border: none;
   border-radius: 8px;
-  background: #808080;
+  background: #4e4e4e;
   color: #ffffff;
   font-size: 16px;
   font-weight: 600;
@@ -41,7 +41,7 @@ body {
 }
 
 .btn:hover {
-  background: #666666;
+  background: #000000;
 }
 
 .board {
