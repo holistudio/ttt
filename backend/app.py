@@ -2,6 +2,8 @@ from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
 
+from agents.muzero import muzero
+
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 app = Flask(
@@ -23,6 +25,18 @@ game = {
     "over": False,
 }
 
+muzero_config = {
+    'state_size': 16,
+    'hidden_size': 64,
+    'max_iters': 100,
+    'gamma': 1.0,
+    'k_unroll_steps': 5,
+    'temperature': 1.0,
+    'dirichlet_alpha': 1.0,
+    'root_exploration_fraction': 0.4
+}
+
+agent = muzero.MuZeroAgent(config=muzero_config,load=True)
 
 def check_result(board):
     for a, b, c in WIN_LINES:
