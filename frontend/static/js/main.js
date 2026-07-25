@@ -25,7 +25,17 @@ function render() {
     gameOverTitleEl.classList.toggle("hidden", !state.over);
     playAgainEl.classList.toggle("hidden", !state.over);
     if (state.over) {
-        gameOverTitleEl.textContent = state.winner ? `${state.winner} Wins!` : "Draw";
+        gameOverTitleEl.innerHTML = "";
+        if (state.winner) {
+            const icon = document.createElement("img");
+            icon.className = "overlay-icon";
+            icon.src = state.winner === "X" ? "static/img/cross.png" : "static/img/circle.png";
+            gameOverTitleEl.appendChild(icon);
+            gameOverTitleEl.appendChild(document.createTextNode(" wins!"));
+        }
+        else {
+            gameOverTitleEl.textContent = "Draw";
+        }
     }
     for (let i = 0; i < 9; i++) {
         const existing = boardEl.querySelector(`.piece[data-idx="${i}"]`);

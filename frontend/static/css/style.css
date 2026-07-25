@@ -59,10 +59,21 @@ body {
 
 .overlay-title {
   margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-size: 40px;
   font-weight: 700;
-  color: #4d4d4d;
+  color: #000000;
   text-align: center;
+}
+
+.overlay-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .hidden {
