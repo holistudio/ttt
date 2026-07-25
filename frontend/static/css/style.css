@@ -1,0 +1,45 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.board {
+  width: 560px;
+  height: 560px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  background-image: url("../img/board.png");
+  background-size: 100% 100%;
+  cursor: pointer;
+  filter: grayscale(1) contrast(1.2);
+  transition: opacity 0.2s ease;
+}
+
+.board.over {
+  opacity: 0.5;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.piece {
+  width: 55%;
+  height: 55%;
+  object-fit: contain;
+}
