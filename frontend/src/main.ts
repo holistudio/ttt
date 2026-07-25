@@ -30,14 +30,16 @@ async function postReset(): Promise<GameState> {
 
 function render(): void {
   const boardEl = document.getElementById("board") as HTMLDivElement;
-  const overlayEl = document.getElementById("game-over") as HTMLDivElement;
-  const overlayTitleEl = document.getElementById("game-over-title") as HTMLHeadingElement;
+  const topbarEl = document.getElementById("topbar") as HTMLElement;
+  const gameOverTitleEl = document.getElementById("game-over-title") as HTMLHeadingElement;
+  const playAgainEl = document.getElementById("play-again") as HTMLButtonElement;
 
-  boardEl.classList.toggle("over", state.over);
-  overlayEl.classList.toggle("hidden", !state.over);
+  topbarEl.classList.toggle("hidden", state.over);
+  gameOverTitleEl.classList.toggle("hidden", !state.over);
+  playAgainEl.classList.toggle("hidden", !state.over);
 
   if (state.over) {
-    overlayTitleEl.textContent = state.winner ? `${state.winner} Wins!` : "Draw";
+    gameOverTitleEl.textContent = state.winner ? `${state.winner} Wins!` : "Draw";
   }
 
   for (let i = 0; i < 9; i++) {

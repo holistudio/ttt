@@ -8,19 +8,16 @@
 </head>
 <body>
   <div class="app">
-    <header class="topbar">
+    <header id="topbar" class="topbar">
       <h1 class="title">tic tac toe</h1>
       <button id="new-game" class="btn">New Game</button>
     </header>
 
-    <div class="board-wrap">
-      <div id="board" class="board"></div>
+    <h2 id="game-over-title" class="overlay-title hidden">Game Over</h2>
 
-      <div id="game-over" class="overlay hidden">
-        <h2 id="game-over-title" class="overlay-title">Game Over</h2>
-        <button id="play-again" class="btn btn-play-again">Play Again</button>
-      </div>
-    </div>
+    <div id="board" class="board"></div>
+
+    <button id="play-again" class="btn btn-play-again hidden">Play Again</button>
   </div>
   <script src="static/js/main.js"></script>
 </body>

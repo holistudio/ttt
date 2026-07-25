@@ -18,12 +18,14 @@ async function postReset() {
 }
 function render() {
     const boardEl = document.getElementById("board");
-    const overlayEl = document.getElementById("game-over");
-    const overlayTitleEl = document.getElementById("game-over-title");
-    boardEl.classList.toggle("over", state.over);
-    overlayEl.classList.toggle("hidden", !state.over);
+    const topbarEl = document.getElementById("topbar");
+    const gameOverTitleEl = document.getElementById("game-over-title");
+    const playAgainEl = document.getElementById("play-again");
+    topbarEl.classList.toggle("hidden", state.over);
+    gameOverTitleEl.classList.toggle("hidden", !state.over);
+    playAgainEl.classList.toggle("hidden", !state.over);
     if (state.over) {
-        overlayTitleEl.textContent = state.winner ? `${state.winner} Wins!` : "Draw";
+        gameOverTitleEl.textContent = state.winner ? `${state.winner} Wins!` : "Draw";
     }
     for (let i = 0; i < 9; i++) {
         const existing = boardEl.querySelector(`.piece[data-idx="${i}"]`);
