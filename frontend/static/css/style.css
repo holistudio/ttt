@@ -11,7 +11,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f6f1e7;
+  background: #ffffff;
   font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
@@ -26,21 +26,13 @@ body {
   width: 594px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.title {
-  margin: 0;
-  font-size: 32px;
-  font-weight: 700;
-  color: #6b5c4f;
-  text-transform: capitalize;
+  justify-content: flex-end;
 }
 
 .btn {
   border: none;
   border-radius: 8px;
-  background: #8f7d6e;
+  background: #808080;
   color: #ffffff;
   font-size: 16px;
   font-weight: 600;
@@ -49,7 +41,7 @@ body {
 }
 
 .btn:hover {
-  background: #7c6c5f;
+  background: #666666;
 }
 
 .board {
@@ -69,7 +61,7 @@ body {
   margin: 0;
   font-size: 40px;
   font-weight: 700;
-  color: #6b5c4f;
+  color: #4d4d4d;
   text-align: center;
 }
 
