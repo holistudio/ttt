@@ -22,11 +22,30 @@ body {
   gap: 32px;
 }
 
-.topbar {
+.header-slot {
+  position: relative;
   width: 594px;
+  height: 64px;
+}
+
+.header-slot > .topbar,
+.header-slot > .overlay-title {
+  position: absolute;
+  inset: 0;
+}
+
+.topbar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+
+.footer-slot {
+  width: 594px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn {

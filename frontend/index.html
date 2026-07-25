@@ -8,15 +8,19 @@
 </head>
 <body>
   <div class="app">
-    <header id="topbar" class="topbar">
-      <button id="new-game" class="btn">New Game</button>
-    </header>
+    <div class="header-slot">
+      <header id="topbar" class="topbar">
+        <button id="new-game" class="btn">New Game</button>
+      </header>
 
-    <h2 id="game-over-title" class="overlay-title hidden">Game Over</h2>
+      <h2 id="game-over-title" class="overlay-title hidden">Game Over</h2>
+    </div>
 
     <div id="board" class="board"></div>
 
-    <button id="play-again" class="btn btn-play-again hidden">Play Again</button>
+    <div class="footer-slot">
+      <button id="play-again" class="btn btn-play-again hidden">Play Again</button>
+    </div>
   </div>
   <script src="static/js/main.js"></script>
 </body>
