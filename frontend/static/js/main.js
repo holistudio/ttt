@@ -19,17 +19,25 @@ async function postReset() {
 function render() {
     const boardEl = document.getElementById("board");
     boardEl.classList.toggle("over", state.over);
-    const cells = boardEl.querySelectorAll(".cell");
-    cells.forEach((cell, i) => {
-        cell.innerHTML = "";
+    for (let i = 0; i < 9; i++) {
+        const existing = boardEl.querySelector(`.piece[data-idx="${i}"]`);
         const mark = state.board[i];
-        if (mark) {
+        if (!mark) {
+            existing?.remove();
+            continue;
+        }
+        const src = mark === "X" ? "static/img/cross.png" : "static/img/circle.png";
+        if (existing) {
+            existing.src = src;
+        }
+        else {
             const img = document.createElement("img");
             img.className = "piece";
-            img.src = mark === "X" ? "static/img/cross.png" : "static/img/circle.png";
-            cell.appendChild(img);
+            img.dataset.idx = String(i);
+            img.src = src;
+            boardEl.appendChild(img);
         }
-    });
+    }
 }
 async function handleCellClick(index) {
     if (state.over) {

@@ -16,15 +16,16 @@ body {
 }
 
 .board {
-  width: 560px;
-  height: 560px;
+  position: relative;
+  width: 594px;
+  height: 588px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   background-image: url("../img/board.png");
   background-size: 100% 100%;
+  image-rendering: pixelated;
   cursor: pointer;
-  filter: grayscale(1) contrast(1.2);
   transition: opacity 0.2s ease;
 }
 
@@ -33,13 +34,27 @@ body {
 }
 
 .cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* transparent click target only; visual tile lives in the board.png background */
 }
 
+/*
+ * board.png's baked-in tiles are not exact equal thirds (5px left / 4px right
+ * margin out of 99px; 5px top / 6px bottom out of 98px), so pieces are placed
+ * at the tile's measured position instead of the naive grid center.
+ */
 .piece {
-  width: 55%;
-  height: 55%;
+  position: absolute;
   object-fit: contain;
+  pointer-events: none;
+  image-rendering: pixelated;
 }
+
+.piece[data-idx="0"] { left: 5.0505%;  top: 5.1020%;  width: 26.2626%; height: 25.5102%; }
+.piece[data-idx="1"] { left: 37.3737%; top: 5.1020%;  width: 26.2626%; height: 25.5102%; }
+.piece[data-idx="2"] { left: 69.6970%; top: 5.1020%;  width: 26.2626%; height: 25.5102%; }
+.piece[data-idx="3"] { left: 5.0505%;  top: 36.7347%; width: 26.2626%; height: 25.5102%; }
+.piece[data-idx="4"] { left: 37.3737%; top: 36.7347%; width: 26.2626%; height: 25.5102%; }
+.piece[data-idx="5"] { left: 69.6970%; top: 36.7347%; width: 26.2626%; height: 25.5102%; }
+.piece[data-idx="6"] { left: 5.0505%;  top: 68.3673%; width: 26.2626%; height: 25.5102%; }
+.piece[data-idx="7"] { left: 37.3737%; top: 68.3673%; width: 26.2626%; height: 25.5102%; }
+.piece[data-idx="8"] { left: 69.6970%; top: 68.3673%; width: 26.2626%; height: 25.5102%; }
