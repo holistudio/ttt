@@ -185,10 +185,10 @@ cython_debug/
 .cursorindexingignore
 
 # IDE
-.vscode/*
+/.vscode
 !.vscode/settings.json
 !.vscode/extensions.json
-.idea/
+/.idea
 
 # OS
 .DS_Store
