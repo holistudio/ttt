@@ -191,11 +191,6 @@ class MuZeroAgent(object):
         self.action_space = environment.action_space('player_1')
         self.action_size = self.action_space.n
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        
-        # replay buffer for loading training batch data
-        self.replay_buffer = ReplayBuffer(config['buffer_size'], config['batch_size'])
-        self.buffer_size = config['buffer_size']
-        self.min_replay_size = config['min_replay_size']
 
         # neural networks
         self.state_function = StateFunction(self.obs_size[0],
@@ -221,7 +216,6 @@ class MuZeroAgent(object):
         self.min_Q = float('inf')
         self.max_Q = -float('inf')
         self.max_iters = config['max_iters']
-        self.train_iters = config['train_iters']
         self.gamma = config['gamma']
         self.k_unroll_steps = config['k_unroll_steps']
 
@@ -229,7 +223,6 @@ class MuZeroAgent(object):
         self.action_probs = torch.zeros(self.action_size)
         self.temperature = config['temperature']
         self.episodes_played = 0 # temperature schedule based on episodes
-        self.temp_schedule = config.get('temp_schedule', None)
         self.dirichlet_alpha = config['dirichlet_alpha']
         self.root_exploration_fraction = config['root_exploration_fraction']
 
