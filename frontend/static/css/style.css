@@ -12,7 +12,7 @@ body {
   align-items: center;
   justify-content: center;
   background: #ffffff;
-  font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: sans-serif;
 }
 
 .app {
