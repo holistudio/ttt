@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Conda
+.conda/
+
 # Distribution / packaging
 .Python
 build/
@@ -129,6 +132,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.local
 .venv
 env/
 venv/
@@ -179,3 +183,19 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / TypeScript
+node_modules/
+dist/
+build/
+*.tsbuildinfo
