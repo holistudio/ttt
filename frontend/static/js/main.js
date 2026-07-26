@@ -91,8 +91,11 @@ function render() {
         }
     }
 }
+function isRlAgent(agent) {
+    return agent !== null && agent !== "human";
+}
 async function advanceAgentTurns() {
-    while (state.started && !state.over && state.players[state.turn] === "muzero") {
+    while (state.started && !state.over && isRlAgent(state.players[state.turn])) {
         await sleep(AGENT_MOVE_DELAY_MS);
         state = await postAgentMove();
         render();

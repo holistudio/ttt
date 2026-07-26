@@ -1,5 +1,5 @@
 type Mark = "X" | "O";
-type AgentType = "human" | "muzero";
+type AgentType = "human" | "random" | "muzero";
 
 interface GameState {
   board: (Mark | null)[];
@@ -116,8 +116,12 @@ function render(): void {
   }
 }
 
+function isRlAgent(agent: AgentType | null): boolean {
+  return agent !== null && agent !== "human";
+}
+
 async function advanceAgentTurns(): Promise<void> {
-  while (state.started && !state.over && state.players[state.turn] === "muzero") {
+  while (state.started && !state.over && isRlAgent(state.players[state.turn])) {
     await sleep(AGENT_MOVE_DELAY_MS);
     state = await postAgentMove();
     render();

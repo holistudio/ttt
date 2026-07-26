@@ -45,6 +45,11 @@ muzero_config = {
 muzero_agent = muzero.MuZeroAgent(config=muzero_config,load=True)
 rand_agent = random_agent.RandomAgent()
 
+RL_AGENTS = {
+    "random": rand_agent,
+    "muzero": muzero_agent,
+}
+
 def check_result(board):
     for a, b, c in WIN_LINES:
         if board[a] and board[a] == board[b] == board[c]:
@@ -106,7 +111,8 @@ def make_move():
 
 @app.route("/api/agent-move", methods=["POST"])
 def agent_move():
-    if not game["started"] or game["over"] or game["players"].get(game["turn"]) != "muzero":
+    rl_agent = RL_AGENTS.get(game["players"].get(game["turn"]))
+    if not game["started"] or game["over"] or rl_agent is None:
         return jsonify(game), 400
 
     current_mark = game["turn"]
