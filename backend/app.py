@@ -67,22 +67,7 @@ def make_move():
         return jsonify(game), 400
 
     game["board"][index] = game["turn"]
-    
-    board_vals = np.array(game["board"]).reshape(3,3).T
-    # print(board_vals)
-    observation = np.empty((3,3,2), dtype=np.int8)
-    current_piece = "O" if game["turn"] == "X" else "X"
-    opp_piece = game["turn"]
-    observation[:,:,0] = np.equal(board_vals,current_piece)
-    observation[:,:,1] = np.equal(board_vals,opp_piece)
-    # print(observation[:,:,0])
-    # print(observation[:,:,1])
-    obs_dict = {
-        'observation': observation
-    }
-    if current_piece == "O":
-        print(agent.act(obs_dict))
-    
+
     result = check_result(game["board"])
 
     if result == "draw":
@@ -93,6 +78,30 @@ def make_move():
         game["winner"] = result
     else:
         game["turn"] = "O" if game["turn"] == "X" else "X"
+
+        if game["turn"] == "O":
+            board_vals = np.array(game["board"]).reshape(3,3).T
+            observation = np.empty((3,3,2), dtype=np.int8)
+            observation[:,:,0] = np.equal(board_vals, "O")
+            observation[:,:,1] = np.equal(board_vals, "X")
+            obs_dict = {
+                'observation': observation
+            }
+            action = agent.act(obs_dict)
+            # action indexes board_vals (board.reshape(3,3).T) in row-major order,
+            # so convert back to the flat board index the frontend uses
+            agent_index = (action % 3) * 3 + (action // 3)
+            game["board"][agent_index] = "O"
+
+            result = check_result(game["board"])
+            if result == "draw":
+                game["over"] = True
+                game["winner"] = None
+            elif result:
+                game["over"] = True
+                game["winner"] = result
+            else:
+                game["turn"] = "X"
 
     return jsonify(game)
 
