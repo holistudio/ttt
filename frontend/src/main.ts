@@ -42,6 +42,15 @@ async function postReset(players: Record<Mark, AgentType>): Promise<GameState> {
   return res.json();
 }
 
+async function postSoftReset(): Promise<GameState> {
+  const res = await fetch("/api/reset", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  });
+  return res.json();
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -140,6 +149,15 @@ async function handleNewGame(): Promise<void> {
   await advanceAgentTurns();
 }
 
+async function handlePlayAgain(): Promise<void> {
+  state = await postSoftReset();
+  const { selectX, selectO } = getSelects();
+  selectX.value = "";
+  selectO.value = "";
+  updateNewGameVisibility();
+  render();
+}
+
 async function init(): Promise<void> {
   const boardEl = document.getElementById("board") as HTMLDivElement;
   for (let i = 0; i < 9; i++) {
@@ -154,7 +172,7 @@ async function init(): Promise<void> {
   selectO.addEventListener("change", updateNewGameVisibility);
 
   document.getElementById("new-game")?.addEventListener("click", handleNewGame);
-  document.getElementById("play-again")?.addEventListener("click", handleNewGame);
+  document.getElementById("play-again")?.addEventListener("click", handlePlayAgain);
 
   state = await fetchState();
 

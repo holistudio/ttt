@@ -25,6 +25,14 @@ async function postReset(players) {
     });
     return res.json();
 }
+async function postSoftReset() {
+    const res = await fetch("/api/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+    });
+    return res.json();
+}
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -111,6 +119,14 @@ async function handleNewGame() {
     render();
     await advanceAgentTurns();
 }
+async function handlePlayAgain() {
+    state = await postSoftReset();
+    const { selectX, selectO } = getSelects();
+    selectX.value = "";
+    selectO.value = "";
+    updateNewGameVisibility();
+    render();
+}
 async function init() {
     const boardEl = document.getElementById("board");
     for (let i = 0; i < 9; i++) {
@@ -123,7 +139,7 @@ async function init() {
     selectX.addEventListener("change", updateNewGameVisibility);
     selectO.addEventListener("change", updateNewGameVisibility);
     document.getElementById("new-game")?.addEventListener("click", handleNewGame);
-    document.getElementById("play-again")?.addEventListener("click", handleNewGame);
+    document.getElementById("play-again")?.addEventListener("click", handlePlayAgain);
     state = await fetchState();
     if (state.players.X)
         selectX.value = state.players.X;

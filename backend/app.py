@@ -127,7 +127,19 @@ def agent_move():
 @app.route("/api/reset", methods=["POST"])
 def reset():
     data = request.get_json(silent=True) or {}
-    players = data.get("players") or {}
+    players = data.get("players")
+
+    # no players given: soft reset back to the initial, unconfigured state
+    # (used by "Play Again" so a fresh agent choice is required for each game)
+    if players is None:
+        game["board"] = [None] * 9
+        game["turn"] = "X"
+        game["winner"] = None
+        game["over"] = False
+        game["players"] = {"X": None, "O": None}
+        game["started"] = False
+        return jsonify(game)
+
     player_x = players.get("X")
     player_o = players.get("O")
 
