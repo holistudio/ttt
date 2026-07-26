@@ -76,7 +76,7 @@ def apply_move(index):
         game["turn"] = "O" if game["turn"] == "X" else "X"
 
 
-def muzero_action_to_index(action):
+def rl_action_to_index(action):
     # action indexes board.reshape(3,3).T in row-major order,
     # so convert back to the flat board index the frontend uses
     return (action % 3) * 3 + (action // 3)
@@ -117,7 +117,7 @@ def agent_move():
     obs_dict = {"observation": observation}
 
     action = agent.act(obs_dict)
-    index = muzero_action_to_index(action)
+    index = rl_action_to_index(action)
 
     apply_move(index)
 
