@@ -3,6 +3,7 @@ import numpy as np
 
 from flask import Flask, jsonify, request, send_from_directory
 
+from agents.random import random_agent
 from agents.muzero import muzero
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
@@ -19,7 +20,7 @@ WIN_LINES = [
     (0, 4, 8), (2, 4, 6),
 ]
 
-AGENT_TYPES = {"human", "muzero"}
+AGENT_TYPES = {"human", "random", "muzero"}
 
 game = {
     "board": [None] * 9,
@@ -41,7 +42,8 @@ muzero_config = {
     'root_exploration_fraction': 0.4
 }
 
-agent = muzero.MuZeroAgent(config=muzero_config,load=True)
+muzero_agent = muzero.MuZeroAgent(config=muzero_config,load=True)
+rand_agent = random_agent.RandomAgent()
 
 def check_result(board):
     for a, b, c in WIN_LINES:
@@ -116,7 +118,7 @@ def agent_move():
     observation[:, :, 1] = np.equal(board_vals, opp_mark)
     obs_dict = {"observation": observation}
 
-    action = agent.act(obs_dict)
+    action = rl_agent.act(obs_dict)
     index = rl_action_to_index(action)
 
     apply_move(index)
