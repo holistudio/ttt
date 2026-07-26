@@ -199,3 +199,4 @@ node_modules/
 dist/
 build/
 *.tsbuildinfo
+/.claude
