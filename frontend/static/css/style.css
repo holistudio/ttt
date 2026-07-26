@@ -37,7 +37,12 @@ body {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+}
+
+.topbar-agents {
+  display: flex;
+  align-items: center;
   gap: 24px;
 }
 
@@ -98,6 +103,11 @@ body {
 }
 
 .board.disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.board.locked {
   cursor: default;
 }
 

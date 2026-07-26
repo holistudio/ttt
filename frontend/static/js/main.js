@@ -56,7 +56,8 @@ function render() {
     topbarEl.classList.toggle("hidden", state.over);
     gameOverTitleEl.classList.toggle("hidden", !state.over);
     playAgainEl.classList.toggle("hidden", !state.over);
-    boardEl.classList.toggle("disabled", !state.started || state.over);
+    boardEl.classList.toggle("disabled", !state.started);
+    boardEl.classList.toggle("locked", state.over);
     if (state.over) {
         gameOverTitleEl.innerHTML = "";
         if (state.winner) {
