@@ -37,7 +37,28 @@ body {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.agent-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.agent-select {
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
 .footer-slot {
@@ -74,6 +95,10 @@ body {
   background-size: 100% 100%;
   image-rendering: pixelated;
   cursor: pointer;
+}
+
+.board.disabled {
+  cursor: default;
 }
 
 .overlay-title {

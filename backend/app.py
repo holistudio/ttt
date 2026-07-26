@@ -19,11 +19,15 @@ WIN_LINES = [
     (0, 4, 8), (2, 4, 6),
 ]
 
+AGENT_TYPES = {"human", "muzero"}
+
 game = {
     "board": [None] * 9,
     "turn": "X",
     "winner": None,
     "over": False,
+    "players": {"X": None, "O": None},
+    "started": False,
 }
 
 muzero_config = {
@@ -58,18 +62,10 @@ def get_state():
     return jsonify(game)
 
 
-@app.route("/api/move", methods=["POST"])
-def make_move():
-    data = request.get_json(silent=True) or {}
-    index = data.get("index")
-
-    if game["over"] or not isinstance(index, int) or not (0 <= index < 9) or game["board"][index] is not None:
-        return jsonify(game), 400
-
+def apply_move(index):
     game["board"][index] = game["turn"]
 
     result = check_result(game["board"])
-
     if result == "draw":
         game["over"] = True
         game["winner"] = None
@@ -79,39 +75,71 @@ def make_move():
     else:
         game["turn"] = "O" if game["turn"] == "X" else "X"
 
-        if game["turn"] == "O":
-            board_vals = np.array(game["board"]).reshape(3,3).T
-            observation = np.empty((3,3,2), dtype=np.int8)
-            observation[:,:,0] = np.equal(board_vals, "O")
-            observation[:,:,1] = np.equal(board_vals, "X")
-            obs_dict = {
-                'observation': observation
-            }
-            action = agent.act(obs_dict)
-            # action indexes board_vals (board.reshape(3,3).T) in row-major order,
-            # so convert back to the flat board index the frontend uses
-            agent_index = (action % 3) * 3 + (action // 3)
-            game["board"][agent_index] = "O"
 
-            result = check_result(game["board"])
-            if result == "draw":
-                game["over"] = True
-                game["winner"] = None
-            elif result:
-                game["over"] = True
-                game["winner"] = result
-            else:
-                game["turn"] = "X"
+def muzero_action_to_index(action):
+    # action indexes board.reshape(3,3).T in row-major order,
+    # so convert back to the flat board index the frontend uses
+    return (action % 3) * 3 + (action // 3)
+
+
+@app.route("/api/move", methods=["POST"])
+def make_move():
+    data = request.get_json(silent=True) or {}
+    index = data.get("index")
+
+    if (
+        not game["started"]
+        or game["over"]
+        or game["players"].get(game["turn"]) != "human"
+        or not isinstance(index, int)
+        or not (0 <= index < 9)
+        or game["board"][index] is not None
+    ):
+        return jsonify(game), 400
+
+    apply_move(index)
+
+    return jsonify(game)
+
+
+@app.route("/api/agent-move", methods=["POST"])
+def agent_move():
+    if not game["started"] or game["over"] or game["players"].get(game["turn"]) != "muzero":
+        return jsonify(game), 400
+
+    current_mark = game["turn"]
+    opp_mark = "O" if current_mark == "X" else "X"
+
+    board_vals = np.array(game["board"]).reshape(3, 3).T
+    observation = np.empty((3, 3, 2), dtype=np.int8)
+    observation[:, :, 0] = np.equal(board_vals, current_mark)
+    observation[:, :, 1] = np.equal(board_vals, opp_mark)
+    obs_dict = {"observation": observation}
+
+    action = agent.act(obs_dict)
+    index = muzero_action_to_index(action)
+
+    apply_move(index)
 
     return jsonify(game)
 
 
 @app.route("/api/reset", methods=["POST"])
 def reset():
+    data = request.get_json(silent=True) or {}
+    players = data.get("players") or {}
+    player_x = players.get("X")
+    player_o = players.get("O")
+
+    if player_x not in AGENT_TYPES or player_o not in AGENT_TYPES:
+        return jsonify(game), 400
+
     game["board"] = [None] * 9
     game["turn"] = "X"
     game["winner"] = None
     game["over"] = False
+    game["players"] = {"X": player_x, "O": player_o}
+    game["started"] = True
     return jsonify(game)
 
 

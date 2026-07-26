@@ -10,7 +10,23 @@
   <div class="app">
     <div class="header-slot">
       <header id="topbar" class="topbar">
-        <button id="new-game" class="btn">New Game</button>
+        <div class="agent-picker">
+          <img src="static/img/cross.png" class="agent-icon" alt="X" />
+          <select id="select-x" class="agent-select">
+            <option value="" selected>select agent...</option>
+            <option value="human">human</option>
+            <option value="muzero">muzero</option>
+          </select>
+        </div>
+        <div class="agent-picker">
+          <img src="static/img/circle.png" class="agent-icon" alt="O" />
+          <select id="select-o" class="agent-select">
+            <option value="" selected>select agent...</option>
+            <option value="human">human</option>
+            <option value="muzero">muzero</option>
+          </select>
+        </div>
+        <button id="new-game" class="btn hidden">New Game</button>
       </header>
 
       <h2 id="game-over-title" class="overlay-title hidden">Game Over</h2>

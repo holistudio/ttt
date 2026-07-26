@@ -1,4 +1,5 @@
 "use strict";
+const AGENT_MOVE_DELAY_MS = 500;
 let state;
 async function fetchState() {
     const res = await fetch("/api/state");
@@ -12,9 +13,32 @@ async function postMove(index) {
     });
     return res.json();
 }
-async function postReset() {
-    const res = await fetch("/api/reset", { method: "POST" });
+async function postAgentMove() {
+    const res = await fetch("/api/agent-move", { method: "POST" });
     return res.json();
+}
+async function postReset(players) {
+    const res = await fetch("/api/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ players }),
+    });
+    return res.json();
+}
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+function getSelects() {
+    return {
+        selectX: document.getElementById("select-x"),
+        selectO: document.getElementById("select-o"),
+    };
+}
+function updateNewGameVisibility() {
+    const newGameEl = document.getElementById("new-game");
+    const { selectX, selectO } = getSelects();
+    const ready = Boolean(selectX.value) && Boolean(selectO.value);
+    newGameEl.classList.toggle("hidden", !ready);
 }
 function render() {
     const boardEl = document.getElementById("board");
@@ -24,6 +48,7 @@ function render() {
     topbarEl.classList.toggle("hidden", state.over);
     gameOverTitleEl.classList.toggle("hidden", !state.over);
     playAgainEl.classList.toggle("hidden", !state.over);
+    boardEl.classList.toggle("disabled", !state.started || state.over);
     if (state.over) {
         gameOverTitleEl.innerHTML = "";
         if (state.winner) {
@@ -31,7 +56,7 @@ function render() {
             icon.className = "overlay-icon";
             icon.src = state.winner === "X" ? "static/img/cross.png" : "static/img/circle.png";
             gameOverTitleEl.appendChild(icon);
-            gameOverTitleEl.appendChild(document.createTextNode(" wins!"));
+            gameOverTitleEl.appendChild(document.createTextNode(" Wins!"));
         }
         else {
             gameOverTitleEl.textContent = "Draw";
@@ -57,16 +82,34 @@ function render() {
         }
     }
 }
+async function advanceAgentTurns() {
+    while (state.started && !state.over && state.players[state.turn] === "muzero") {
+        await sleep(AGENT_MOVE_DELAY_MS);
+        state = await postAgentMove();
+        render();
+    }
+}
 async function handleCellClick(index) {
-    if (state.over || state.board[index]) {
+    if (!state.started ||
+        state.over ||
+        state.board[index] ||
+        state.players[state.turn] !== "human") {
         return;
     }
     state = await postMove(index);
     render();
+    await advanceAgentTurns();
 }
-async function handleReset() {
-    state = await postReset();
+async function handleNewGame() {
+    const { selectX, selectO } = getSelects();
+    const playerX = selectX.value;
+    const playerO = selectO.value;
+    if (!playerX || !playerO) {
+        return;
+    }
+    state = await postReset({ X: playerX, O: playerO });
     render();
+    await advanceAgentTurns();
 }
 async function init() {
     const boardEl = document.getElementById("board");
@@ -76,9 +119,18 @@ async function init() {
         cell.addEventListener("click", () => handleCellClick(i));
         boardEl.appendChild(cell);
     }
-    document.getElementById("new-game")?.addEventListener("click", handleReset);
-    document.getElementById("play-again")?.addEventListener("click", handleReset);
+    const { selectX, selectO } = getSelects();
+    selectX.addEventListener("change", updateNewGameVisibility);
+    selectO.addEventListener("change", updateNewGameVisibility);
+    document.getElementById("new-game")?.addEventListener("click", handleNewGame);
+    document.getElementById("play-again")?.addEventListener("click", handleNewGame);
     state = await fetchState();
+    if (state.players.X)
+        selectX.value = state.players.X;
+    if (state.players.O)
+        selectO.value = state.players.O;
+    updateNewGameVisibility();
     render();
+    await advanceAgentTurns();
 }
 init();
