@@ -1,4 +1,5 @@
 from pathlib import Path
+import numpy as np
 
 from flask import Flask, jsonify, request, send_from_directory
 
@@ -66,6 +67,22 @@ def make_move():
         return jsonify(game), 400
 
     game["board"][index] = game["turn"]
+    
+    board_vals = np.array(game["board"]).reshape(3,3).T
+    # print(board_vals)
+    observation = np.empty((3,3,2), dtype=np.int8)
+    current_piece = "O" if game["turn"] == "X" else "X"
+    opp_piece = game["turn"]
+    observation[:,:,0] = np.equal(board_vals,current_piece)
+    observation[:,:,1] = np.equal(board_vals,opp_piece)
+    # print(observation[:,:,0])
+    # print(observation[:,:,1])
+    obs_dict = {
+        'observation': observation
+    }
+    if current_piece == "O":
+        print(agent.act(obs_dict))
+    
     result = check_result(game["board"])
 
     if result == "draw":
