@@ -11,7 +11,7 @@ class RandomAgent(object):
     exposes the same essential interface as MuZeroAgent
     so it can be swapped in without changing caller code
     """
-    def __init__(self, config=None):
+    def __init__(self):
         self.obs_size = torch.Size([9])
         self.action_size = 9
         pass
