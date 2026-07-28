@@ -7,9 +7,9 @@ conda activate ttt
 conda install -c conda-forge uv
 
 # install backend deps with uv
+# cd backend # if not already
 uv pip install -r requirements.txt
 
 # run server
-# cd backend # if not already
 python app.py
 ```
