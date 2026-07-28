@@ -124,7 +124,9 @@ def agent_move():
     observation[:, :, 1] = np.equal(board_vals, opp_mark)
     obs_dict = {"observation": observation}
 
-    action = rl_agent.act(obs_dict)
+    action, action_probs = rl_agent.act(obs_dict)
+    if game["players"].get(game["turn"]) != 'random':
+        print(action_probs.reshape(3,3).T)
     index = rl_action_to_index(action)
 
     apply_move(index)
