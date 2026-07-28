@@ -1,5 +1,5 @@
 flask
 flask-cors
 pillow
-numpy
 torch
+"numpy<2"
