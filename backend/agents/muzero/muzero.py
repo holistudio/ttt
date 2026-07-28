@@ -532,7 +532,7 @@ class MuZeroAgent(object):
                 self.add_exploration_noise(root_node)
 
             for i in range(self.max_iters):
-                print(f"\niter={i}")
+                # print(f"\niter={i}")
                 # select leaf node
                 last_node, search_path, action_history = self.selection(root_node)
 
