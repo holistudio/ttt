@@ -22,6 +22,10 @@ WIN_LINES = [
 
 AGENT_TYPES = {"human", "random", "muzero"}
 
+# agent types whose act() probabilities are not worth displaying:
+# humans don't produce any, and random's are uniform over legal moves
+NO_DISPLAY_PROBS_AGENT_TYPES = {"human", "random"}
+
 game = {
     "board": [None] * 9,
     "turn": "X",
@@ -29,6 +33,7 @@ game = {
     "over": False,
     "players": {"X": None, "O": None},
     "started": False,
+    "action_probs": {"X": None, "O": None},
 }
 
 muzero_config = {
@@ -125,9 +130,17 @@ def agent_move():
     obs_dict = {"observation": observation}
 
     action, action_probs = rl_agent.act(obs_dict)
-    if game["players"].get(game["turn"]) != 'random':
-        print(action_probs.reshape(3,3).T)
     index = rl_action_to_index(action)
+
+    if game["players"].get(current_mark) not in NO_DISPLAY_PROBS_AGENT_TYPES:
+        # rl_action_to_index is its own inverse (it's a matrix transpose),
+        # so it also maps a board index back to its action index
+        game["action_probs"][current_mark] = [
+            float(action_probs[rl_action_to_index(i)]) if game["board"][i] is None else None
+            for i in range(9)
+        ]
+    else:
+        game["action_probs"][current_mark] = None
 
     apply_move(index)
 
@@ -148,6 +161,7 @@ def reset():
         game["over"] = False
         game["players"] = {"X": None, "O": None}
         game["started"] = False
+        game["action_probs"] = {"X": None, "O": None}
         return jsonify(game)
 
     player_x = players.get("X")
@@ -162,6 +176,7 @@ def reset():
     game["over"] = False
     game["players"] = {"X": player_x, "O": player_o}
     game["started"] = True
+    game["action_probs"] = {"X": None, "O": None}
     return jsonify(game)
 
 

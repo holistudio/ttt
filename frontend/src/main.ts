@@ -8,6 +8,7 @@ interface GameState {
   over: boolean;
   players: Record<Mark, AgentType | null>;
   started: boolean;
+  action_probs: Record<Mark, (number | null)[] | null>;
 }
 
 const AGENT_MOVE_DELAY_MS = 500;
@@ -114,10 +115,39 @@ function render(): void {
       boardEl.appendChild(img);
     }
   }
+
+  renderProbsBoard("probs-x", "X");
+  renderProbsBoard("probs-o", "O");
 }
 
 function isRlAgent(agent: AgentType | null): boolean {
   return agent !== null && agent !== "human";
+}
+
+function hasActionProbs(agent: AgentType | null): boolean {
+  return agent !== null && agent !== "human" && agent !== "random";
+}
+
+function renderProbsBoard(elId: string, mark: Mark): void {
+  const el = document.getElementById(elId) as HTMLDivElement;
+  const probs = state.action_probs[mark];
+  const show = hasActionProbs(state.players[mark]) && probs !== null;
+
+  el.classList.toggle("hidden", !show);
+  el.innerHTML = "";
+  if (!show || !probs) {
+    return;
+  }
+
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement("div");
+    cell.className = "prob-cell";
+    const p = probs[i];
+    if (p !== null) {
+      cell.textContent = p.toFixed(2);
+    }
+    el.appendChild(cell);
+  }
 }
 
 async function advanceAgentTurns(): Promise<void> {

@@ -90,9 +90,33 @@ function render() {
             boardEl.appendChild(img);
         }
     }
+    renderProbsBoard("probs-x", "X");
+    renderProbsBoard("probs-o", "O");
 }
 function isRlAgent(agent) {
     return agent !== null && agent !== "human";
+}
+function hasActionProbs(agent) {
+    return agent !== null && agent !== "human" && agent !== "random";
+}
+function renderProbsBoard(elId, mark) {
+    const el = document.getElementById(elId);
+    const probs = state.action_probs[mark];
+    const show = hasActionProbs(state.players[mark]) && probs !== null;
+    el.classList.toggle("hidden", !show);
+    el.innerHTML = "";
+    if (!show || !probs) {
+        return;
+    }
+    for (let i = 0; i < 9; i++) {
+        const cell = document.createElement("div");
+        cell.className = "prob-cell";
+        const p = probs[i];
+        if (p !== null) {
+            cell.textContent = p.toFixed(2);
+        }
+        el.appendChild(cell);
+    }
 }
 async function advanceAgentTurns() {
     while (state.started && !state.over && isRlAgent(state.players[state.turn])) {

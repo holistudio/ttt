@@ -89,6 +89,12 @@ body {
   background: #000000;
 }
 
+.board-row {
+  position: relative;
+  width: 594px;
+  height: 588px;
+}
+
 .board {
   position: relative;
   width: 594px;
@@ -100,6 +106,42 @@ body {
   background-size: 100% 100%;
   image-rendering: pixelated;
   cursor: pointer;
+}
+
+.probs-board {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 70%;
+  height: 70%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 6px;
+  padding: 12px;
+  background: #f0deb0;
+  border-radius: 18px;
+  box-shadow: 5px 6px 0 rgba(0, 0, 0, 0.18);
+}
+
+.probs-board.side-left {
+  right: calc(100% + 32px);
+}
+
+.probs-board.side-right {
+  left: calc(100% + 32px);
+}
+
+.prob-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6e9c8;
+  border: 2px solid #ddc48c;
+  border-radius: 10px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #2b2b2b;
 }
 
 .board.disabled {
