@@ -328,6 +328,7 @@ class MuZeroAgent(object):
         add child nodes to a given leaf node based on legal actions
         and initialize them with policy priors based on the prediction network
         """
+        # print('expansion()')
 
         last_node.state = state
         last_node.R = reward
@@ -355,6 +356,7 @@ class MuZeroAgent(object):
         sum_visits: total number of visits to the parent node
         (same as sum of visits across all parent's child nodes)
         """
+        # print('pUCT()')
         
         c1 = 1.25
         c2 = 19652
@@ -380,6 +382,7 @@ class MuZeroAgent(object):
 
         (NOT for selecting the next action in the game)
         """
+        # print('select_child()')
         
         # parent node visits same as sum of visits across all parent's child nodes
         sum_visits = node.N
@@ -403,6 +406,8 @@ class MuZeroAgent(object):
         - unexpanded leaf node
         - latest search path and action history
         """
+        # print('selection()')
+
         search_path = [node]
         action_history = []
 
@@ -418,6 +423,8 @@ class MuZeroAgent(object):
         update mean value based on simulated game outcomes 
         and node visit counts during simulation
         """
+        # print('backup()')
+
         to_play = search_path[-1].to_play
         G = value
         for i in range(len(search_path) - 1, -1, -1):
@@ -438,6 +445,7 @@ class MuZeroAgent(object):
         select the next action to take in the game
         given tree search root node and softmax sampling temperature
         """
+        # print('select_action()')
 
         # sample action based on visit counts and temperature
         sum_visits = node.N
@@ -493,6 +501,7 @@ class MuZeroAgent(object):
 
         return: next action to play in the game
         """
+        print('\n\nsearch()')
 
         # ensure inference mode
         with torch.no_grad():
@@ -523,6 +532,7 @@ class MuZeroAgent(object):
                 self.add_exploration_noise(root_node)
 
             for i in range(self.max_iters):
+                print(f"\niter={i}")
                 # select leaf node
                 last_node, search_path, action_history = self.selection(root_node)
 
@@ -575,6 +585,8 @@ class MuZeroAgent(object):
         select next action to play in the game
         with softmax temperature sampling
         """
+        # print('step()')
+
         obs = self.preprocess_obs(observation)
         
         # simple temperature annealing for tic-tac-toe:
@@ -596,6 +608,7 @@ class MuZeroAgent(object):
         select next action to play in the game
         with neural nets doing inference 
         """
+        # print('act()')
 
         # neural nets should be in evaluation mode
         self.state_function.eval()
