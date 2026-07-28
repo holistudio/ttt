@@ -501,7 +501,7 @@ class MuZeroAgent(object):
 
         return: next action to play in the game
         """
-        print('\n\nsearch()')
+        # print('\n\nsearch()')
 
         # ensure inference mode
         with torch.no_grad():
