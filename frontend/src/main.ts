@@ -9,7 +9,11 @@ interface GameState {
   players: Record<Mark, AgentType | null>;
   started: boolean;
   action_probs: Record<Mark, (number | null)[] | null>;
+  board_state_counts: Record<Mark, number | null>;
 }
+
+// width of "10,000", the highest count a board state can reach in training
+const BOARD_STATE_COUNT_WIDTH = 6;
 
 const AGENT_MOVE_DELAY_MS = 500;
 
@@ -117,7 +121,9 @@ function render(): void {
   }
 
   renderProbsBoard("probs-x", "X");
+  renderBoardStateCount("probs-x-count", "X");
   renderProbsBoard("probs-o", "O");
+  renderBoardStateCount("probs-o-count", "O");
 }
 
 function isRlAgent(agent: AgentType | null): boolean {
@@ -150,6 +156,23 @@ function renderProbsBoard(elId: string, mark: Mark): void {
     cell.textContent = p.toFixed(2);
     el.appendChild(cell);
   }
+}
+
+function formatBoardStateCount(count: number): string {
+  // right-align the number within a fixed-width field (padded with
+  // non-breaking spaces, which don't collapse) so the surrounding text
+  // doesn't shift horizontally as the digit count changes between moves
+  const digits = count.toLocaleString("en-US");
+  return digits.padStart(BOARD_STATE_COUNT_WIDTH, " ");
+}
+
+function renderBoardStateCount(elId: string, mark: Mark): void {
+  const el = document.getElementById(elId) as HTMLDivElement;
+  const count = state.board_state_counts[mark];
+  const show = state.players[mark] === "muzero" && count !== null;
+
+  el.classList.toggle("hidden", !show);
+  el.textContent = show ? `seen ${formatBoardStateCount(count as number)} times during training` : "";
 }
 
 async function advanceAgentTurns(): Promise<void> {

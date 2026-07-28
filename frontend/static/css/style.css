@@ -108,12 +108,29 @@ body {
   cursor: pointer;
 }
 
-.probs-board {
+.probs-panel {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   width: 70%;
-  height: 70%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.probs-panel.side-left {
+  right: calc(100% + 32px);
+}
+
+.probs-panel.side-right {
+  left: calc(100% + 32px);
+}
+
+.probs-board {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
     url("../img/board.png");
   background-size: 100% 100%;
@@ -121,12 +138,11 @@ body {
   border-radius: 4px;
 }
 
-.probs-board.side-left {
-  right: calc(100% + 32px);
-}
-
-.probs-board.side-right {
-  left: calc(100% + 32px);
+.probs-count {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2b2b2b;
+  text-align: center;
 }
 
 /* positions mirror .piece's measured tile centers (see note above) so text

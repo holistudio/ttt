@@ -35,6 +35,7 @@ game = {
     "players": {"X": None, "O": None},
     "started": False,
     "action_probs": {"X": None, "O": None},
+    "board_state_counts": {"X": None, "O": None},
 }
 
 muzero_config = {
@@ -150,6 +151,9 @@ def agent_move():
         board_state = encode_muzero_board_state(game["board"])
         count = muzero_board_state_counts.get(board_state, 0)
         print(f"[muzero] board state {board_state} seen {count} times during training")
+        game["board_state_counts"][current_mark] = count
+    else:
+        game["board_state_counts"][current_mark] = None
 
     action, action_probs = rl_agent.act(obs_dict)
     index = rl_action_to_index(action)
@@ -184,6 +188,7 @@ def reset():
         game["players"] = {"X": None, "O": None}
         game["started"] = False
         game["action_probs"] = {"X": None, "O": None}
+        game["board_state_counts"] = {"X": None, "O": None}
         return jsonify(game)
 
     player_x = players.get("X")
@@ -199,6 +204,7 @@ def reset():
     game["players"] = {"X": player_x, "O": player_o}
     game["started"] = True
     game["action_probs"] = {"X": None, "O": None}
+    game["board_state_counts"] = {"X": None, "O": None}
     return jsonify(game)
 
 
