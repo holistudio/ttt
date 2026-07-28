@@ -114,9 +114,6 @@ body {
   transform: translateY(-50%);
   width: 70%;
   height: 70%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
   background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
     url("../img/board.png");
   background-size: 100% 100%;
@@ -132,14 +129,25 @@ body {
   left: calc(100% + 32px);
 }
 
+/* positions mirror .piece's measured tile centers (see note above) so text
+   lands on the same visual tile centers regardless of panel size */
 .prob-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: absolute;
+  transform: translate(-50%, -50%);
   font-size: 22px;
   font-weight: 600;
   color: #2b2b2b;
 }
+
+.prob-cell[data-idx="0"] { left: 18.1818%; top: 17.8571%; }
+.prob-cell[data-idx="1"] { left: 50.5051%; top: 17.8571%; }
+.prob-cell[data-idx="2"] { left: 82.8283%; top: 17.8571%; }
+.prob-cell[data-idx="3"] { left: 18.1818%; top: 49.4898%; }
+.prob-cell[data-idx="4"] { left: 50.5051%; top: 49.4898%; }
+.prob-cell[data-idx="5"] { left: 82.8283%; top: 49.4898%; }
+.prob-cell[data-idx="6"] { left: 18.1818%; top: 81.1224%; }
+.prob-cell[data-idx="7"] { left: 50.5051%; top: 81.1224%; }
+.prob-cell[data-idx="8"] { left: 82.8283%; top: 81.1224%; }
 
 .board.disabled {
   cursor: default;

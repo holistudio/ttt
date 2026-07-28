@@ -140,12 +140,14 @@ function renderProbsBoard(elId: string, mark: Mark): void {
   }
 
   for (let i = 0; i < 9; i++) {
+    const p = probs[i];
+    if (p === null) {
+      continue;
+    }
     const cell = document.createElement("div");
     cell.className = "prob-cell";
-    const p = probs[i];
-    if (p !== null) {
-      cell.textContent = p.toFixed(2);
-    }
+    cell.dataset.idx = String(i);
+    cell.textContent = p.toFixed(2);
     el.appendChild(cell);
   }
 }
