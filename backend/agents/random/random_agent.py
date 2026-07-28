@@ -87,7 +87,7 @@ class RandomAgent(object):
         """
         obs = self.preprocess_obs(observation)
         action = self.search(obs)
-        return action
+        return action, []
 
     def act(self, observation):
         """
@@ -95,4 +95,4 @@ class RandomAgent(object):
         """
         obs = self.preprocess_obs(observation)
         action = self.search(obs)
-        return action
+        return action, []
