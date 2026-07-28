@@ -2,22 +2,49 @@
 // width of "10,000", the highest count a board state can reach in training
 const BOARD_STATE_COUNT_WIDTH = 6;
 const AGENT_MOVE_DELAY_MS = 500;
+// game state lives in the browser, not on the server: the backend is
+// stateless and just computes the next state from whatever we send it
+const STORAGE_KEY = "ttt-game-state";
 let state;
+function loadStoredState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+        return null;
+    }
+    try {
+        return JSON.parse(raw);
+    }
+    catch {
+        return null;
+    }
+}
+function saveState(next) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    return next;
+}
 async function fetchState() {
+    const stored = loadStoredState();
+    if (stored) {
+        return stored;
+    }
     const res = await fetch("/api/state");
-    return res.json();
+    return saveState(await res.json());
 }
 async function postMove(index) {
     const res = await fetch("/api/move", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ index }),
+        body: JSON.stringify({ index, state }),
     });
-    return res.json();
+    return saveState(await res.json());
 }
 async function postAgentMove() {
-    const res = await fetch("/api/agent-move", { method: "POST" });
-    return res.json();
+    const res = await fetch("/api/agent-move", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ state }),
+    });
+    return saveState(await res.json());
 }
 async function postReset(players) {
     const res = await fetch("/api/reset", {
@@ -25,7 +52,7 @@ async function postReset(players) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ players }),
     });
-    return res.json();
+    return saveState(await res.json());
 }
 async function postSoftReset() {
     const res = await fetch("/api/reset", {
@@ -33,7 +60,7 @@ async function postSoftReset() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
     });
-    return res.json();
+    return saveState(await res.json());
 }
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));

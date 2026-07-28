@@ -17,25 +17,54 @@ const BOARD_STATE_COUNT_WIDTH = 6;
 
 const AGENT_MOVE_DELAY_MS = 500;
 
+// game state lives in the browser, not on the server: the backend is
+// stateless and just computes the next state from whatever we send it
+const STORAGE_KEY = "ttt-game-state";
+
 let state: GameState;
 
+function loadStoredState(): GameState | null {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    return null;
+  }
+  try {
+    return JSON.parse(raw) as GameState;
+  } catch {
+    return null;
+  }
+}
+
+function saveState(next: GameState): GameState {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  return next;
+}
+
 async function fetchState(): Promise<GameState> {
+  const stored = loadStoredState();
+  if (stored) {
+    return stored;
+  }
   const res = await fetch("/api/state");
-  return res.json();
+  return saveState(await res.json());
 }
 
 async function postMove(index: number): Promise<GameState> {
   const res = await fetch("/api/move", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ index }),
+    body: JSON.stringify({ index, state }),
   });
-  return res.json();
+  return saveState(await res.json());
 }
 
 async function postAgentMove(): Promise<GameState> {
-  const res = await fetch("/api/agent-move", { method: "POST" });
-  return res.json();
+  const res = await fetch("/api/agent-move", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ state }),
+  });
+  return saveState(await res.json());
 }
 
 async function postReset(players: Record<Mark, AgentType>): Promise<GameState> {
@@ -44,7 +73,7 @@ async function postReset(players: Record<Mark, AgentType>): Promise<GameState> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ players }),
   });
-  return res.json();
+  return saveState(await res.json());
 }
 
 async function postSoftReset(): Promise<GameState> {
@@ -53,7 +82,7 @@ async function postSoftReset(): Promise<GameState> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
   });
-  return res.json();
+  return saveState(await res.json());
 }
 
 function sleep(ms: number): Promise<void> {
