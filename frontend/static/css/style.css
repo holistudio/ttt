@@ -117,11 +117,11 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 6px;
-  padding: 12px;
-  background: #f0deb0;
-  border-radius: 18px;
-  box-shadow: 5px 6px 0 rgba(0, 0, 0, 0.18);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+    url("../img/board.png");
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+  border-radius: 4px;
 }
 
 .probs-board.side-left {
@@ -136,9 +136,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f6e9c8;
-  border: 2px solid #ddc48c;
-  border-radius: 10px;
   font-size: 22px;
   font-weight: 600;
   color: #2b2b2b;
