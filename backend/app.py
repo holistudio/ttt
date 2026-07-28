@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import numpy as np
 
@@ -55,6 +56,12 @@ RL_AGENTS = {
     "muzero": muzero_agent,
 }
 
+MUZERO_BOARD_STATES_PATH = (
+    Path(__file__).resolve().parent / "agents" / "muzero" / "board_states_eps9000-9999_log.json"
+)
+with open(MUZERO_BOARD_STATES_PATH) as f:
+    muzero_board_state_counts = json.load(f)
+
 def check_result(board):
     for a, b, c in WIN_LINES:
         if board[a] and board[a] == board[b] == board[c]:
@@ -94,6 +101,16 @@ def rl_action_to_index(action):
     return (action % 3) * 3 + (action // 3)
 
 
+def encode_muzero_board_state(board):
+    # board_states log keys use the same index space as RL actions
+    # (see rl_action_to_index), with 1/2/0 for X/O/empty
+    chars = []
+    for action in range(9):
+        mark = board[rl_action_to_index(action)]
+        chars.append("1" if mark == "X" else "2" if mark == "O" else "0")
+    return "".join(chars)
+
+
 @app.route("/api/move", methods=["POST"])
 def make_move():
     data = request.get_json(silent=True) or {}
@@ -128,6 +145,11 @@ def agent_move():
     observation[:, :, 0] = np.equal(board_vals, current_mark)
     observation[:, :, 1] = np.equal(board_vals, opp_mark)
     obs_dict = {"observation": observation}
+
+    if game["players"].get(current_mark) == "muzero":
+        board_state = encode_muzero_board_state(game["board"])
+        count = muzero_board_state_counts.get(board_state, 0)
+        print(f"[muzero] board state {board_state} seen {count} times during training")
 
     action, action_probs = rl_agent.act(obs_dict)
     index = rl_action_to_index(action)
