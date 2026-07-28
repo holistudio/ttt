@@ -467,7 +467,7 @@ class MuZeroAgent(object):
                 if v > max_visits:
                     max_visits = v
                     best_action = a
-            return best_action
+            return best_action, self.action_probs.numpy(force=True)
         else:
             # softmax sampling with temperature
             # P(a) = (N(a)^(1/T)) / sum(N(b)^(1/T))
@@ -477,7 +477,7 @@ class MuZeroAgent(object):
             
             # sample from multinomial distribution
             action_idx = torch.multinomial(probs, 1).item()
-            return actions[action_idx]
+            return actions[action_idx], self.action_probs.numpy(force=True)
         
     def add_exploration_noise(self, node):
         """
