@@ -8,4 +8,7 @@ npm run build
 
 # watch mode
 npm run watch
+
+# or build directly without npm scripts
+npx tsc
 ```
