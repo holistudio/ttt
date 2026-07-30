@@ -149,8 +149,10 @@ function render(): void {
     }
   }
 
+  renderProbsLabel("probs-x-label", "X");
   renderProbsBoard("probs-x", "X");
   renderBoardStateCount("probs-x-count", "X");
+  renderProbsLabel("probs-o-label", "O");
   renderProbsBoard("probs-o", "O");
   renderBoardStateCount("probs-o-count", "O");
 }
@@ -161,6 +163,12 @@ function isRlAgent(agent: AgentType | null): boolean {
 
 function hasActionProbs(agent: AgentType | null): boolean {
   return agent !== null && agent !== "human" && agent !== "random";
+}
+
+function renderProbsLabel(elId: string, mark: Mark): void {
+  const el = document.getElementById(elId) as HTMLImageElement;
+  const show = hasActionProbs(state.players[mark]) && state.action_probs[mark] !== null;
+  el.classList.toggle("hidden", !show);
 }
 
 function renderProbsBoard(elId: string, mark: Mark): void {

@@ -127,6 +127,13 @@ body {
   left: calc(100% + 32px);
 }
 
+.probs-label {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
 .probs-board {
   position: relative;
   width: 100%;
