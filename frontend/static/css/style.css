@@ -158,8 +158,12 @@ body {
   position: absolute;
   transform: translate(-50%, -50%);
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 400;
   color: #2b2b2b;
+}
+
+.prob-cell-max {
+  font-weight: 600;
 }
 
 .prob-cell[data-idx="0"] { left: 18.1818%; top: 17.8571%; }
