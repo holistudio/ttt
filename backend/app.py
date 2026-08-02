@@ -202,7 +202,13 @@ def agent_move():
     observation = np.empty((3, 3, 2), dtype=np.int8)
     observation[:, :, 0] = np.equal(board_vals, current_mark)
     observation[:, :, 1] = np.equal(board_vals, opp_mark)
-    obs_dict = {"observation": observation}
+    # mcts drives its search off the env's transition()/available_actions(),
+    # which require an action_mask; random/muzero derive legal moves from
+    # the observation planes directly and ignore this key
+    action_mask = np.array(
+        [state["board"][rl_action_to_index(a)] is None for a in range(9)], dtype=np.int8
+    )
+    obs_dict = {"observation": observation, "action_mask": action_mask}
 
     if state["players"].get(current_mark) == "muzero":
         board_state = encode_muzero_board_state(state["board"])
