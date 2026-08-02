@@ -38,6 +38,7 @@ def default_state():
         "players": {"X": None, "O": None},
         "started": False,
         "action_probs": {"X": None, "O": None},
+        "selected_action": {"X": None, "O": None},
         "board_state_counts": {"X": None, "O": None},
     }
 
@@ -118,6 +119,10 @@ def parse_state(data):
     if not isinstance(action_probs, dict):
         action_probs = {}
 
+    selected_action = raw.get("selected_action")
+    if not isinstance(selected_action, dict):
+        selected_action = {}
+
     board_state_counts = raw.get("board_state_counts")
     if not isinstance(board_state_counts, dict):
         board_state_counts = {}
@@ -130,6 +135,7 @@ def parse_state(data):
         "players": {"X": player_x, "O": player_o},
         "started": bool(raw.get("started")),
         "action_probs": {"X": action_probs.get("X"), "O": action_probs.get("O")},
+        "selected_action": {"X": selected_action.get("X"), "O": selected_action.get("O")},
         "board_state_counts": {"X": board_state_counts.get("X"), "O": board_state_counts.get("O")},
     }
 
@@ -228,8 +234,13 @@ def agent_move():
             float(action_probs[rl_action_to_index(i)]) if state["board"][i] is None else None
             for i in range(9)
         ]
+        # ties in action_probs can round/display identically, so the frontend
+        # can't reliably recover which cell the agent actually picked by
+        # re-scanning for the max itself; report it explicitly
+        state["selected_action"][current_mark] = index
     else:
         state["action_probs"][current_mark] = None
+        state["selected_action"][current_mark] = None
 
     apply_move(state, index)
 

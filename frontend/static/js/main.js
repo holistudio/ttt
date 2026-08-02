@@ -153,15 +153,10 @@ function renderProbsBoard(elId, mark) {
     if (!show || !probs) {
         return;
     }
-    let maxIdx = -1;
-    let maxP = -Infinity;
-    for (let i = 0; i < 9; i++) {
-        const p = probs[i];
-        if (p !== null && p > maxP) {
-            maxP = p;
-            maxIdx = i;
-        }
-    }
+    // bold the cell the agent actually picked, not a re-derived argmax: ties
+    // in probs can round/compare equal while the agent's own tie-break (over
+    // a differently-ordered action space) chose a specific one of them
+    const maxIdx = state.selected_action[mark];
     for (let i = 0; i < 9; i++) {
         const p = probs[i];
         if (p === null) {
