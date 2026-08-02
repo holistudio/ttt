@@ -146,7 +146,6 @@ function renderProbsBoard(elId, mark) {
     if (!show || !probs) {
         return;
     }
-    const maxProb = Math.max(...probs.filter((p) => p !== null));
     for (let i = 0; i < 9; i++) {
         const p = probs[i];
         if (p === null) {
@@ -154,7 +153,6 @@ function renderProbsBoard(elId, mark) {
         }
         const cell = document.createElement("div");
         cell.className = "prob-cell";
-        cell.classList.toggle("prob-cell-max", p === maxProb);
         cell.dataset.idx = String(i);
         cell.textContent = p.toFixed(2);
         el.appendChild(cell);

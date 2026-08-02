@@ -1,5 +1,5 @@
 type Mark = "X" | "O";
-type AgentType = "human" | "random" | "muzero";
+type AgentType = "human" | "random" | "mcts" | "muzero";
 
 interface GameState {
   board: (Mark | null)[];
