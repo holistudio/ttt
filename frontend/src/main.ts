@@ -182,13 +182,23 @@ function renderProbsBoard(elId: string, mark: Mark): void {
     return;
   }
 
+  let maxIdx = -1;
+  let maxP = -Infinity;
+  for (let i = 0; i < 9; i++) {
+    const p = probs[i];
+    if (p !== null && p > maxP) {
+      maxP = p;
+      maxIdx = i;
+    }
+  }
+
   for (let i = 0; i < 9; i++) {
     const p = probs[i];
     if (p === null) {
       continue;
     }
     const cell = document.createElement("div");
-    cell.className = "prob-cell";
+    cell.className = i === maxIdx ? "prob-cell prob-cell-max" : "prob-cell";
     cell.dataset.idx = String(i);
     cell.textContent = p.toFixed(2);
     el.appendChild(cell);
