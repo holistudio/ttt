@@ -108,10 +108,12 @@ function render(): void {
   const topbarEl = document.getElementById("topbar") as HTMLElement;
   const gameOverTitleEl = document.getElementById("game-over-title") as HTMLHeadingElement;
   const playAgainEl = document.getElementById("play-again") as HTMLButtonElement;
+  const nextMoveEl = document.getElementById("next-move") as HTMLButtonElement;
 
   topbarEl.classList.toggle("hidden", state.over);
   gameOverTitleEl.classList.toggle("hidden", !state.over);
   playAgainEl.classList.toggle("hidden", !state.over);
+  nextMoveEl.classList.toggle("hidden", state.over || !state.started || !isAgentVsAgent());
   boardEl.classList.toggle("disabled", !state.started);
   boardEl.classList.toggle("locked", state.over);
 
@@ -159,6 +161,12 @@ function render(): void {
 
 function isRlAgent(agent: AgentType | null): boolean {
   return agent !== null && agent !== "human";
+}
+
+// when neither player is human, agent moves are stepped one at a time via
+// the "Next Move" button rather than auto-playing
+function isAgentVsAgent(): boolean {
+  return isRlAgent(state.players.X) && isRlAgent(state.players.O);
 }
 
 function hasActionProbs(agent: AgentType | null): boolean {
@@ -223,11 +231,22 @@ function renderBoardStateCount(elId: string, mark: Mark): void {
 }
 
 async function advanceAgentTurns(): Promise<void> {
+  if (isAgentVsAgent()) {
+    return;
+  }
   while (state.started && !state.over && isRlAgent(state.players[state.turn])) {
     await sleep(AGENT_MOVE_DELAY_MS);
     state = await postAgentMove();
     render();
   }
+}
+
+async function handleNextMove(): Promise<void> {
+  if (!state.started || state.over || !isRlAgent(state.players[state.turn])) {
+    return;
+  }
+  state = await postAgentMove();
+  render();
 }
 
 async function handleCellClick(index: number): Promise<void> {
@@ -280,6 +299,7 @@ async function init(): Promise<void> {
 
   document.getElementById("new-game")?.addEventListener("click", handleNewGame);
   document.getElementById("play-again")?.addEventListener("click", handlePlayAgain);
+  document.getElementById("next-move")?.addEventListener("click", handleNextMove);
 
   state = await fetchState();
 
