@@ -1,0 +1,140 @@
+import numpy as np
+
+"""plain UCT search"""
+
+class Node(object):
+    def __init__(self, state, available_actions, parent=None, incoming_action=None):
+        self.parent = parent
+        self.children = {} # keys are actions, values are Nodes
+
+        self.Q = [] # sum() to get total rewards
+        self.N = 0
+
+        self.untried_actions = available_actions
+        self.incoming_action = incoming_action
+
+        self.state = state
+        pass
+
+    def sample_untried_actions(self):
+        num_actions = len(self.untried_actions)
+        idx = np.random.randint(0,num_actions)
+        a = self.untried_actions.pop(idx)
+        return a
+    
+    def is_full_expanded(self):
+        if len(self.untried_actions) == 0:
+            return True
+        else:
+            return False
+    
+
+class UCTAgent(object):
+    def __init__(self, environment, C_p=0.7, max_iters=10_000):
+        self.C_p = C_p
+        self.max_iters = max_iters
+
+        self.env = environment
+        pass
+
+    def expand(self, parent_node, parent_state):
+        action = parent_node.sample_untried_actions()
+        next_state = self.env.transition(parent_state, action)
+        next_actions = self.env.available_actions(next_state)
+        next_node = Node(state = next_state, available_actions=next_actions, parent=parent_node, incoming_action=action)
+        parent_node.children[action] = next_node
+        return next_node, next_state
+    
+    def best_child(self, parent_node, parent_state):
+        N = parent_node.N
+        max_uct_node = None
+        max_uct_value = -float('inf')
+
+        for action in sorted(parent_node.children):
+            
+            child_node = parent_node.children[action]
+
+            q = sum(child_node.Q)
+            n_child = child_node.N
+
+            if n_child == 0:
+                uct_value = float('inf')
+            else:
+                exploitation_term = (q/n_child)
+                exploration_term = 2*self.C_p*np.sqrt(2*np.log(N)/n_child)
+                uct_value = exploitation_term + exploration_term
+            if uct_value > max_uct_value:
+                max_uct_value = uct_value
+                max_uct_node = child_node
+        return max_uct_node
+    
+    def tree_policy(self, parent_node, parent_state):
+        while not self.env.check_terminal(parent_state):
+            if not parent_node.is_full_expanded():
+                return self.expand(parent_node, parent_state)
+            else:
+                parent_node = self.best_child(parent_node, parent_state)
+                action = parent_node.incoming_action
+                parent_state = self.env.transition(parent_state, action)
+        return parent_node, parent_state
+    
+    def default_policy(self, state):
+        steps = 0
+        while not self.env.check_terminal(state):
+            actions = self.env.available_actions(state)
+            num_actions = len(actions)
+            idx = np.random.randint(0,num_actions)
+            action = actions[idx]
+            state = self.env.transition(state, action)
+            steps += 1
+
+        # backup outcome sign depends which player moved INTO the leaf node
+        # relative to that player, odd number of steps suggests that player won
+        # even number of steps suggests player lost
+        outcome = self.env.outcome(state) if (steps % 2 == 1) else -self.env.outcome(state)
+        return outcome
+    
+    def backup_negamax(self, node, outcome):
+        while node is not None:
+            node.N += 1
+            node.Q.append(outcome)
+            outcome = -outcome
+            node = node.parent
+    
+    def final_action(self, root_node, initial_state):
+
+        N = root_node.N
+        best_action = None
+        max_visits = -1
+        action_probs = np.zeros(9)
+        for a in sorted(root_node.children):
+            child_node = root_node.children[a]
+            avg_q = sum(child_node.Q) / child_node.N if child_node.N > 0 else 0
+            exploration_term = 2*self.C_p*np.sqrt(2*np.log(N)/child_node.N) if child_node.N > 0 else float('inf')
+            action_prob = child_node.N/root_node.N
+            print(f"### Action={a}, Num Visits= {child_node.N}({action_prob:.2f}), Expected Value= {avg_q:.2f}, UCT Value= {avg_q+exploration_term:.2f}")
+            action_probs[a] = action_prob
+            if child_node.N > max_visits:
+                max_visits = child_node.N
+                best_action = a
+        print(f"\n# PLACE at CELL {best_action}")
+        return best_action, action_probs
+
+    def uct_search(self, initial_state):
+        root_node = Node(initial_state, self.env.available_actions(initial_state))
+        for _ in range(self.max_iters):
+            # print(self.iter)
+            new_node, new_state = self.tree_policy(root_node, initial_state)
+            outcome = self.default_policy(new_state)
+            self.backup_negamax(new_node, outcome)
+            # pause = input('END OF SEARCH ITER')
+        # print('END OF UCT SEARCH')
+
+        # return self.best_child(root_node, initial_state).incoming_action
+        return self.final_action(root_node, initial_state)
+
+    def step(self, obs):
+        return self.uct_search(obs)
+
+    def act(self, obs):
+        return self.step(obs)
