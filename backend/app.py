@@ -4,7 +4,9 @@ import numpy as np
 
 from flask import Flask, jsonify, request, send_from_directory
 
+from environment.tictactoe import tictactoe
 from agents.random import random_agent
+from agents.mcts import mcts
 from agents.muzero import muzero
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
@@ -21,7 +23,7 @@ WIN_LINES = [
     (0, 4, 8), (2, 4, 6),
 ]
 
-AGENT_TYPES = {"human", "random", "muzero"}
+AGENT_TYPES = {"human", "random", "mcts", "muzero"}
 
 # agent types whose act() probabilities are not worth displaying:
 # humans don't produce any, and random's are uniform over legal moves
@@ -50,11 +52,14 @@ muzero_config = {
     'root_exploration_fraction': 0.4
 }
 
+env = tictactoe.env()
+mcts_agent = mcts.UCTAgent(environment=env)
 muzero_agent = muzero.MuZeroAgent(config=muzero_config,load=True)
 rand_agent = random_agent.RandomAgent()
 
 RL_AGENTS = {
     "random": rand_agent,
+    "mcts": mcts_agent,
     "muzero": muzero_agent,
 }
 
