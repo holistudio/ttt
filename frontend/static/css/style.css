@@ -264,6 +264,16 @@ body {
   }
 }
 
+@media (max-width: 560px) {
+  .topbar {
+    justify-content: center;
+  }
+
+  .topbar-agents {
+    width: 100%;
+  }
+}
+
 @media (max-width: 420px) {
   .app {
     gap: 20px;
