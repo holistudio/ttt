@@ -38,23 +38,23 @@
       <h2 id="game-over-title" class="overlay-title hidden">Game Over</h2>
     </div>
 
-    <div class="board-row">
-      <div class="probs-panel side-left">
+    <div class="content">
+      <div id="probs-x-panel" class="probs-panel side-left hidden">
         <img id="probs-x-label" src="static/img/cross.png" class="probs-label hidden" alt="X" />
         <div id="probs-x" class="probs-board hidden"></div>
         <div id="probs-x-count" class="probs-count hidden"></div>
       </div>
       <div id="board" class="board"></div>
-      <div class="probs-panel side-right">
+      <div id="probs-o-panel" class="probs-panel side-right hidden">
         <img id="probs-o-label" src="static/img/circle.png" class="probs-label hidden" alt="O" />
         <div id="probs-o" class="probs-board hidden"></div>
         <div id="probs-o-count" class="probs-count hidden"></div>
       </div>
-    </div>
 
-    <div class="footer-slot">
-      <button id="play-again" class="btn btn-play-again hidden">Play Again</button>
-      <button id="next-move" class="btn btn-play-again hidden">Next Move</button>
+      <div class="footer-slot">
+        <button id="play-again" class="btn btn-play-again hidden">Play Again</button>
+        <button id="next-move" class="btn btn-play-again hidden">Next Move</button>
+      </div>
     </div>
   </div>
   <script src="static/js/main.js"></script>

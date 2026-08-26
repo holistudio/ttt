@@ -121,12 +121,19 @@ function render() {
             boardEl.appendChild(img);
         }
     }
+    renderProbsPanel("probs-x-panel", "X");
     renderProbsLabel("probs-x-label", "X");
     renderProbsBoard("probs-x", "X");
     renderBoardStateCount("probs-x-count", "X");
+    renderProbsPanel("probs-o-panel", "O");
     renderProbsLabel("probs-o-label", "O");
     renderProbsBoard("probs-o", "O");
     renderBoardStateCount("probs-o-count", "O");
+}
+function renderProbsPanel(elId, mark) {
+    const el = document.getElementById(elId);
+    const show = hasActionProbs(state.players[mark]) && state.action_probs[mark] !== null;
+    el.classList.toggle("hidden", !show);
 }
 function isRlAgent(agent) {
     return agent !== null && agent !== "human";

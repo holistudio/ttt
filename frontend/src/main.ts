@@ -152,12 +152,20 @@ function render(): void {
     }
   }
 
+  renderProbsPanel("probs-x-panel", "X");
   renderProbsLabel("probs-x-label", "X");
   renderProbsBoard("probs-x", "X");
   renderBoardStateCount("probs-x-count", "X");
+  renderProbsPanel("probs-o-panel", "O");
   renderProbsLabel("probs-o-label", "O");
   renderProbsBoard("probs-o", "O");
   renderBoardStateCount("probs-o-count", "O");
+}
+
+function renderProbsPanel(elId: string, mark: Mark): void {
+  const el = document.getElementById(elId) as HTMLDivElement;
+  const show = hasActionProbs(state.players[mark]) && state.action_probs[mark] !== null;
+  el.classList.toggle("hidden", !show);
 }
 
 function isRlAgent(agent: AgentType | null): boolean {
