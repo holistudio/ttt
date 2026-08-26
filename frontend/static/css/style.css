@@ -10,8 +10,6 @@ html, body {
 
 body {
   display: flex;
-  align-items: safe center;
-  justify-content: safe center;
   background: #ffffff;
   font-family: sans-serif;
 }
@@ -23,6 +21,7 @@ body {
   gap: 32px;
   width: 100%;
   padding: 16px;
+  margin: auto;
 }
 
 .header-slot {
