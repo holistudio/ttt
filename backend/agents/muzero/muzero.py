@@ -218,6 +218,8 @@ class MuZeroAgent(object):
 
         self.root_value = 0
         self.action_probs = torch.zeros(self.action_size)
+        self.action_qs = torch.full((self.action_size,), float('nan'))
+        self.action_visits = torch.zeros(self.action_size, dtype=torch.int64)
         self.temperature = config['temperature']
         self.episodes_played = 0 # temperature schedule based on episodes
         self.dirichlet_alpha = config['dirichlet_alpha']
@@ -450,7 +452,9 @@ class MuZeroAgent(object):
         # sample action based on visit counts and temperature
         sum_visits = node.N
         self.action_probs = torch.zeros(self.action_size)
-        
+        self.action_qs = torch.full((self.action_size,), float('nan'))
+        self.action_visits = torch.zeros(self.action_size, dtype=torch.int64)
+
         # account for visit counts for each action
         visits = []
         actions = []
@@ -458,6 +462,12 @@ class MuZeroAgent(object):
             visits.append(child_node.N)
             actions.append(a)
             self.action_probs[a] = child_node.N / sum_visits
+            self.action_visits[a] = child_node.N
+            if child_node.N > 0:
+                # negate: child.mean_value() is from the child's mover's
+                # perspective (the opponent of the root player), same
+                # convention as pUCT's Q. R is 0 for board games.
+                self.action_qs[a] = -child_node.mean_value()
 
         if temperature == 0:
             # greedy selection (argmax)
