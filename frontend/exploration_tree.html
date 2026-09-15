@@ -104,14 +104,24 @@ function checkWinner(board){
 const LEAF_SPACING = 6;   // world-units between adjacent leaves
 const MAX_DEPTH = 9;
 
-// Builds the full tree. Returns { root, levels, totalWidth }.
-// levels[d] is every node at depth d, guaranteed sorted ascending by .x
+// Builds a deduplicated state graph: distinct move sequences that reach the
+// same exact board (same cell contents, same order of X/O — no symmetry
+// folding) collapse onto one shared node with multiple incoming edges.
+// Returns { root, levels, totalWidth }.
+// levels[d] is every distinct board state at depth d, sorted ascending by .x
+// after layout (depth === number of filled cells, so a board string is a
+// unique key within its depth, and dedup only needs to happen per depth).
 function buildGameTree(){
   const levels = [];
-  for (let i = 0; i <= MAX_DEPTH; i++) levels.push([]);
+  const byBoard = []; // byBoard[depth]: Map<boardKey, node>
+  for (let i = 0; i <= MAX_DEPTH; i++){ levels.push([]); byBoard.push(new Map()); }
   let leafCounter = 0;
 
   function build(board, turn, depth){
+    const key = board.join(',');
+    const existing = byBoard[depth].get(key);
+    if (existing) return existing;
+
     const winner = checkWinner(board);
     let isFull = true;
     for (let i = 0; i < 9; i++){ if (board[i] === null){ isFull = false; break; } }
@@ -122,32 +132,45 @@ function buildGameTree(){
     } else if (isFull){
       node = { board: board.slice(), depth, terminal: true, winner: 'draw', children: null, x: 0 };
     } else {
-      const children = [];
-      node = { board: board.slice(), depth, terminal: false, winner: null, children, x: 0 };
+      node = { board: board.slice(), depth, terminal: false, winner: null, children: [], x: 0 };
+    }
+    byBoard[depth].set(key, node);
+    levels[depth].push(node);
+
+    if (!node.terminal){
       for (let i = 0; i < 9; i++){
         if (board[i] === null){
           board[i] = turn;
-          children.push(build(board, turn === 'X' ? 'O' : 'X', depth + 1));
+          node.children.push(build(board, turn === 'X' ? 'O' : 'X', depth + 1));
           board[i] = null;
         }
       }
     }
-    levels[depth].push(node);
     return node;
   }
 
   const root = build(new Array(9).fill(null), 'X', 0);
 
+  // Position each distinct node exactly once (first time reached), so a
+  // shared node keeps a single x regardless of how many parents point to it.
   function assignX(node){
+    if (node._placed) return;
+    node._placed = true;
     if (!node.children){
       node.x = leafCounter * LEAF_SPACING;
       leafCounter++;
     } else {
       for (const c of node.children) assignX(c);
-      node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2;
+      let sum = 0;
+      for (const c of node.children) sum += c.x;
+      node.x = sum / node.children.length;
     }
   }
   assignX(root);
+  for (let d = 0; d <= MAX_DEPTH; d++){
+    levels[d].sort((a, b) => a.x - b.x);
+    for (const node of levels[d]) delete node._placed;
+  }
 
   return { root, levels, totalWidth: leafCounter * LEAF_SPACING };
 }
@@ -225,7 +248,7 @@ function draw(){
     noStroke(); fill(85);
     textAlign(CENTER, CENTER);
     textFont('monospace'); textSize(14);
-    text('generating all 549,946 game states…', width / 2, height / 2);
+    text('generating game state graph…', width / 2, height / 2);
     return;
   }
 
