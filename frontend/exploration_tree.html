@@ -362,6 +362,11 @@ function draw(){
   function edgeVisible(p, c){
     return !highlightNode || canReachSet.has(c) || descendantSet.has(p);
   }
+  // Nodes are only pared down once a click pins a node — hover alone just
+  // dims edges so exploring stays lightweight.
+  function nodeVisible(node){
+    return !pinnedNode || canReachSet.has(node) || descendantSet.has(node);
+  }
 
   // ---- edges (drawn first, underneath nodes) ----
   stroke(0, 70); strokeWeight(0.7);
@@ -400,11 +405,16 @@ function draw(){
   for (let d = 0; d <= MAX_DEPTH; d++){
     const arr = levels[d];
     const [s, e] = ranges[d];
-    const count = e - s;
-    if (count <= 0) continue;
-    const step = count > MAX_PER_LEVEL ? Math.ceil(count / MAX_PER_LEVEL) : 1;
-    for (let i = s; i < e; i += step){
+    let visibleCount = 0;
+    for (let i = s; i < e; i++){ if (nodeVisible(arr[i])) visibleCount++; }
+    if (visibleCount <= 0) continue;
+    const step = visibleCount > MAX_PER_LEVEL ? Math.ceil(visibleCount / MAX_PER_LEVEL) : 1;
+    let counter = 0;
+    for (let i = s; i < e; i++){
       const node = arr[i];
+      if (!nodeVisible(node)) continue;
+      if (counter % step !== 0){ counter++; continue; }
+      counter++;
       const sx = screenX(node.x);
       const y = nodeY(node, rowH);
       if (!node.terminal){
