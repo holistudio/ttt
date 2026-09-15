@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Every Tic-Tac-Toe Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+<style>
+  :root{
+    --ink: #26282b;
+    --muted: #6b6f76;
+    --panel-bg: rgba(250,250,249,0.88);
+    --panel-border: rgba(20,20,20,0.08);
+    --x-blue: #2454c9;
+    --o-red: #c73434;
+  }
+  html, body{
+    margin:0; padding:0; overflow:hidden; height:100%;
+    background:#d9d9d6;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  #sketch-holder{ position:fixed; inset:0; }
+  canvas{ display:block; touch-action:none; }
+
+  .panel{
+    position:fixed;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.09);
+    backdrop-filter: blur(6px);
+    padding: 14px 16px;
+    z-index: 10;
+  }
+  #info-panel{ top:16px; left:16px; width: 268px; }
+  #info-panel h1{
+    margin:0 0 2px 0; font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em;
+  }
+  #info-panel .sub{ font-size: 11.5px; color: var(--muted); margin-bottom: 10px; }
+  #stats{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px; line-height: 1.7; color: #45484d;
+    border-top: 1px solid var(--panel-border);
+    padding-top: 8px; margin-top: 2px;
+  }
+  #stats b{ color: var(--ink); font-weight: 600; }
+  .legend{ display:flex; flex-direction:column; gap:5px; margin-top:10px; border-top:1px solid var(--panel-border); padding-top:9px;}
+  .legend-row{ display:flex; align-items:center; gap:8px; font-size:11px; color:#45484d; }
+  .dot{ width:11px; height:11px; border-radius:50%; flex:none; }
+  .controls{ font-size: 10.5px; color: var(--muted); margin-top:10px; border-top:1px solid var(--panel-border); padding-top:8px; line-height:1.6;}
+  #reset-btn{
+    margin-top:10px; width:100%; padding:7px 0; font-size:11.5px; font-weight:600;
+    border-radius: 7px; border: 1px solid var(--panel-border); background: #fff; color: var(--ink);
+    cursor:pointer;
+  }
+  #reset-btn:hover{ background:#f2f2f0; }
+
+  #preview-panel{
+    top:16px; right:16px; width: 200px;
+    display:none;
+    text-align:center;
+  }
+  #preview-panel .board-caption{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px; color: #45484d; margin-top:8px; line-height:1.5;
+  }
+  #preview-panel .board-caption b{ color: var(--ink); }
+
+  #loading{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:#55585d; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+<div id="sketch-holder"></div>
+
+<div id="info-panel" class="panel">
+  <h1>Every Tic-Tac-Toe Game</h1>
+  <div class="sub">The complete game tree, root to every ending. X always moves first.</div>
+  <div id="stats">computing tree…</div>
+  <div class="legend">
+    <div class="legend-row"><span class="dot" style="background:#111;"></span> in progress</div>
+    <div class="legend-row"><span class="dot" style="background:var(--x-blue);"></span> X wins</div>
+    <div class="legend-row"><span class="dot" style="background:var(--o-red);"></span> O wins</div>
+    <div class="legend-row"><span class="dot" style="background:#fff;border:1.5px solid #222;"></span> draw</div>
+  </div>
+  <div class="controls">scroll / pinch to zoom &middot; drag to pan &middot; hover a circle for the board</div>
+  <button id="reset-btn">Fit whole tree</button>
+</div>
+
+<div id="preview-panel" class="panel">
+  <div id="preview-svg-holder"></div>
+  <div class="board-caption" id="preview-caption"></div>
+</div>
+
+<script>
+/* ============================================================
+   Tic-Tac-Toe complete game tree — data model
+   ============================================================ */
+const WIN_LINES = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+function checkWinner(board){
+  for (let i = 0; i < WIN_LINES.length; i++){
+    const L = WIN_LINES[i];
+    const a = board[L[0]], b = board[L[1]], c = board[L[2]];
+    if (a && a === b && a === c) return a;
+  }
+  return null;
+}
+
+const LEAF_SPACING = 6;   // world-units between adjacent leaves
+const MAX_DEPTH = 9;
+
+// Builds the full tree. Returns { root, levels, totalWidth }.
+// levels[d] is every node at depth d, guaranteed sorted ascending by .x
+function buildGameTree(){
+  const levels = [];
+  for (let i = 0; i <= MAX_DEPTH; i++) levels.push([]);
+  let leafCounter = 0;
+
+  function build(board, turn, depth){
+    const winner = checkWinner(board);
+    let isFull = true;
+    for (let i = 0; i < 9; i++){ if (board[i] === null){ isFull = false; break; } }
+
+    let node;
+    if (winner){
+      node = { board: board.slice(), depth, terminal: true, winner, children: null, x: 0 };
+    } else if (isFull){
+      node = { board: board.slice(), depth, terminal: true, winner: 'draw', children: null, x: 0 };
+    } else {
+      const children = [];
+      node = { board: board.slice(), depth, terminal: false, winner: null, children, x: 0 };
+      for (let i = 0; i < 9; i++){
+        if (board[i] === null){
+          board[i] = turn;
+          children.push(build(board, turn === 'X' ? 'O' : 'X', depth + 1));
+          board[i] = null;
+        }
+      }
+    }
+    levels[depth].push(node);
+    return node;
+  }
+
+  const root = build(new Array(9).fill(null), 'X', 0);
+
+  function assignX(node){
+    if (!node.children){
+      node.x = leafCounter * LEAF_SPACING;
+      leafCounter++;
+    } else {
+      for (const c of node.children) assignX(c);
+      node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2;
+    }
+  }
+  assignX(root);
+
+  return { root, levels, totalWidth: leafCounter * LEAF_SPACING };
+}
+
+// binary search: first index with arr[i].x >= target
+function lowerBound(arr, target){
+  let lo = 0, hi = arr.length;
+  while (lo < hi){
+    const mid = (lo + hi) >> 1;
+    if (arr[mid].x < target) lo = mid + 1; else hi = mid;
+  }
+  return lo;
+}
+function findNearest(arr, targetX){
+  if (arr.length === 0) return null;
+  const idx = lowerBound(arr, targetX);
+  if (idx <= 0) return arr[0];
+  if (idx >= arr.length) return arr[arr.length - 1];
+  const before = arr[idx - 1], after = arr[idx];
+  return (targetX - before.x) <= (after.x - targetX) ? before : after;
+}
+
+/* ============================================================
+   p5 sketch
+   ============================================================ */
+let tree = null, levels = null, totalWidth = 0;
+let loading = true;
+
+let camX = 0, camScale = 1, minScale = 1, maxScale = 150;
+let isDragging = false;
+let hoveredNode = null;
+
+const TOP_MARGIN = 46, BOTTOM_MARGIN = 34;
+const RADIUS_WORLD = 2.4;
+const MAX_PER_LEVEL = 2200;   // node draw budget per level per frame
+const MAX_EDGES = 2200;       // edge draw budget per level-pair per frame
+
+const BLUE = [36, 84, 201];
+const RED  = [199, 52, 52];
+
+function setup(){
+  const holder = document.getElementById('sketch-holder');
+  const c = createCanvas(windowWidth, windowHeight);
+  c.parent(holder);
+  pixelDensity(1);
+  setTimeout(buildEverything, 30);
+
+  document.getElementById('reset-btn').addEventListener('click', fitWholeTree);
+}
+
+function buildEverything(){
+  tree = buildGameTree();
+  levels = tree.levels;
+  totalWidth = tree.totalWidth;
+
+  let xWins = 0, oWins = 0, draws = 0, inProgress = 0, total = 0;
+  for (const lvl of levels){
+    for (const n of lvl){
+      total++;
+      if (!n.terminal) inProgress++;
+      else if (n.winner === 'X') xWins++;
+      else if (n.winner === 'O') oWins++;
+      else draws++;
+    }
+  }
+  document.getElementById('stats').innerHTML =
+    `<b>${total.toLocaleString()}</b> total states<br>` +
+    `<b>${(xWins+oWins+draws).toLocaleString()}</b> finished games<br>` +
+    `&nbsp;&nbsp;X wins ${xWins.toLocaleString()} &middot; O wins ${oWins.toLocaleString()} &middot; draws ${draws.toLocaleString()}`;
+
+  fitWholeTree();
+  loading = false;
+}
+
+function fitWholeTree(){
+  if (!totalWidth) return;
+  const fitScale = (width * 0.92) / totalWidth;
+  minScale = fitScale * 0.5;
+  maxScale = 160;
+  camScale = constrain(fitScale, minScale, maxScale);
+  camX = totalWidth / 2;
+}
+
+function rowY(depth, rowH){ return TOP_MARGIN + depth * rowH; }
+function screenX(wx){ return (wx - camX) * camScale + width / 2; }
+function worldX(sx){ return (sx - width / 2) / camScale + camX; }
+
+function draw(){
+  background(224);
+
+  if (loading){
+    noStroke(); fill(85);
+    textAlign(CENTER, CENTER);
+    textFont('monospace'); textSize(14);
+    text('generating all 549,946 game states…', width / 2, height / 2);
+    return;
+  }
+
+  const rowH = (height - TOP_MARGIN - BOTTOM_MARGIN) / MAX_DEPTH;
+  const pad = 40 / camScale;
+  const xmin = worldX(0) - pad;
+  const xmax = worldX(width) + pad;
+
+  // precompute visible index-ranges per level once
+  const ranges = new Array(levels.length);
+  for (let d = 0; d <= MAX_DEPTH; d++){
+    const arr = levels[d];
+    ranges[d] = [lowerBound(arr, xmin), lowerBound(arr, xmax)];
+  }
+
+  // ---- edges (drawn first, underneath nodes) ----
+  stroke(0, 70); strokeWeight(0.7);
+  for (let d = 0; d < MAX_DEPTH; d++){
+    const arr = levels[d];
+    const [s, e] = ranges[d];
+    let total = 0;
+    for (let i = s; i < e; i++) total += arr[i].children ? arr[i].children.length : 0;
+    if (total === 0) continue;
+    const step = total > MAX_EDGES ? Math.ceil(total / MAX_EDGES) : 1;
+    const y0 = rowY(d, rowH), y1 = rowY(d + 1, rowH);
+    let counter = 0;
+    for (let i = s; i < e; i++){
+      const node = arr[i];
+      if (!node.children) continue;
+      const sx0 = screenX(node.x);
+      for (const child of node.children){
+        if (counter % step === 0){
+          line(sx0, y0, screenX(child.x), y1);
+        }
+        counter++;
+      }
+    }
+  }
+
+  // ---- nodes ----
+  const r = constrain(RADIUS_WORLD * camScale, 1, 9);
+  noStroke();
+  for (let d = 0; d <= MAX_DEPTH; d++){
+    const arr = levels[d];
+    const [s, e] = ranges[d];
+    const count = e - s;
+    if (count <= 0) continue;
+    const step = count > MAX_PER_LEVEL ? Math.ceil(count / MAX_PER_LEVEL) : 1;
+    const y = rowY(d, rowH);
+    for (let i = s; i < e; i += step){
+      const node = arr[i];
+      const sx = screenX(node.x);
+      if (!node.terminal){
+        noStroke(); fill(15);
+      } else if (node.winner === 'X'){
+        noStroke(); fill(BLUE[0], BLUE[1], BLUE[2]);
+      } else if (node.winner === 'O'){
+        noStroke(); fill(RED[0], RED[1], RED[2]);
+      } else {
+        stroke(30); strokeWeight(0.8); fill(255);
+      }
+      ellipse(sx, y, r * 2, r * 2);
+      noStroke();
+    }
+  }
+
+  // ---- hover detection + highlight ----
+  hoveredNode = findHoveredNode(rowH);
+  if (hoveredNode){
+    const y = rowY(hoveredNode.depth, rowH);
+    const sx = screenX(hoveredNode.x);
+    noFill(); stroke(20, 160); strokeWeight(1.4);
+    ellipse(sx, y, Math.max(r * 2 + 8, 14), Math.max(r * 2 + 8, 14));
+  }
+  updatePreviewPanel(hoveredNode);
+}
+
+function findHoveredNode(rowH){
+  if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return null;
+  const rawDepth = (mouseY - TOP_MARGIN) / rowH;
+  const d = Math.round(rawDepth);
+  if (d < 0 || d > MAX_DEPTH) return null;
+  const arr = levels[d];
+  if (!arr || arr.length === 0) return null;
+  const wx = worldX(mouseX);
+  const nearest = findNearest(arr, wx);
+  if (!nearest) return null;
+  const sx = screenX(nearest.x);
+  const sy = rowY(d, rowH);
+  const dist = Math.hypot(sx - mouseX, sy - mouseY);
+  const r = constrain(RADIUS_WORLD * camScale, 1, 9);
+  const threshold = Math.max(9, r + 7);
+  return dist <= threshold ? nearest : null;
+}
+
+/* ---- preview panel (board rendered as inline SVG for crisp lines/text) ---- */
+let lastPreviewKey = null;
+function updatePreviewPanel(node){
+  const panel = document.getElementById('preview-panel');
+  if (!node){
+    panel.style.display = 'none';
+    lastPreviewKey = null;
+    return;
+  }
+  const key = node.board.join('') + '|' + node.depth;
+  panel.style.display = 'block';
+  if (key === lastPreviewKey) return;
+  lastPreviewKey = key;
+
+  const size = 168, cell = size / 3, m = 2;
+  let svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">`;
+  svg += `<rect x="0" y="0" width="${size}" height="${size}" fill="#fafaf9"/>`;
+  for (let i = 1; i < 3; i++){
+    svg += `<line x1="${i*cell}" y1="0" x2="${i*cell}" y2="${size}" stroke="#bbb" stroke-width="1.5"/>`;
+    svg += `<line x1="0" y1="${i*cell}" x2="${size}" y2="${i*cell}" stroke="#bbb" stroke-width="1.5"/>`;
+  }
+  for (let i = 0; i < 9; i++){
+    const cx = (i % 3) * cell + cell / 2;
+    const cy = Math.floor(i / 3) * cell + cell / 2;
+    const v = node.board[i];
+    if (v === 'X'){
+      const s = cell * 0.28;
+      svg += `<line x1="${cx-s}" y1="${cy-s}" x2="${cx+s}" y2="${cy+s}" stroke="#2454c9" stroke-width="5" stroke-linecap="round"/>`;
+      svg += `<line x1="${cx+s}" y1="${cy-s}" x2="${cx-s}" y2="${cy+s}" stroke="#2454c9" stroke-width="5" stroke-linecap="round"/>`;
+    } else if (v === 'O'){
+      svg += `<circle cx="${cx}" cy="${cy}" r="${cell*0.30}" fill="none" stroke="#c73434" stroke-width="5"/>`;
+    }
+  }
+  svg += `</svg>`;
+  document.getElementById('preview-svg-holder').innerHTML = svg;
+
+  let statusLine;
+  if (node.terminal){
+    statusLine = node.winner === 'draw' ? 'Draw' : `<b>${node.winner} wins</b>`;
+  } else {
+    const next = node.depth % 2 === 0 ? 'X' : 'O';
+    statusLine = node.depth === 0 ? 'Starting position' : `<b>${next}</b> to move`;
+  }
+  document.getElementById('preview-caption').innerHTML =
+    `move ${node.depth} of 9 &middot; ${statusLine}`;
+}
+
+/* ---- interaction ---- */
+function mousePressed(){
+  if (mouseY >= 0 && mouseY <= height) isDragging = true;
+}
+function mouseReleased(){ isDragging = false; }
+function mouseDragged(){
+  if (loading || !isDragging) return;
+  camX -= (mouseX - pmouseX) / camScale;
+  camX = constrain(camX, -totalWidth * 0.2, totalWidth * 1.2);
+}
+function mouseWheel(event){
+  if (loading) return false;
+  const newScale = constrain(camScale * Math.exp(-event.delta * 0.0018), minScale, maxScale);
+  const wx = worldX(mouseX);
+  camScale = newScale;
+  camX = constrain(wx - (mouseX - width / 2) / camScale, -totalWidth * 0.2, totalWidth * 1.2);
+  return false;
+}
+function windowResized(){
+  resizeCanvas(windowWidth, windowHeight);
+}
+</script>
+</body>
+</html>
