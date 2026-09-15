@@ -77,20 +77,6 @@
 <body>
 <div id="sketch-holder"></div>
 
-<div id="info-panel" class="panel">
-  <h1>Every Tic-Tac-Toe Game</h1>
-  <div class="sub">The complete game tree, root to every ending. X always moves first.</div>
-  <div id="stats">computing tree…</div>
-  <div class="legend">
-    <div class="legend-row"><span class="dot" style="background:#111;"></span> in progress</div>
-    <div class="legend-row"><span class="dot" style="background:var(--x-blue);"></span> X wins</div>
-    <div class="legend-row"><span class="dot" style="background:var(--o-red);"></span> O wins</div>
-    <div class="legend-row"><span class="dot" style="background:#fff;border:1.5px solid #222;"></span> draw</div>
-  </div>
-  <div class="controls">scroll / pinch to zoom &middot; drag to pan &middot; hover a circle for the board</div>
-  <button id="reset-btn">Fit whole tree</button>
-</div>
-
 <div id="preview-panel" class="panel">
   <div id="preview-svg-holder"></div>
   <div class="board-caption" id="preview-caption"></div>
@@ -208,29 +194,12 @@ function setup(){
   c.parent(holder);
   pixelDensity(1);
   setTimeout(buildEverything, 30);
-
-  document.getElementById('reset-btn').addEventListener('click', fitWholeTree);
 }
 
 function buildEverything(){
   tree = buildGameTree();
   levels = tree.levels;
   totalWidth = tree.totalWidth;
-
-  let xWins = 0, oWins = 0, draws = 0, inProgress = 0, total = 0;
-  for (const lvl of levels){
-    for (const n of lvl){
-      total++;
-      if (!n.terminal) inProgress++;
-      else if (n.winner === 'X') xWins++;
-      else if (n.winner === 'O') oWins++;
-      else draws++;
-    }
-  }
-  document.getElementById('stats').innerHTML =
-    `<b>${total.toLocaleString()}</b> total states<br>` +
-    `<b>${(xWins+oWins+draws).toLocaleString()}</b> finished games<br>` +
-    `&nbsp;&nbsp;X wins ${xWins.toLocaleString()} &middot; O wins ${oWins.toLocaleString()} &middot; draws ${draws.toLocaleString()}`;
 
   fitWholeTree();
   loading = false;
