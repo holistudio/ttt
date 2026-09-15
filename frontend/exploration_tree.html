@@ -172,7 +172,30 @@ function buildGameTree(){
     for (const node of levels[d]) delete node._placed;
   }
 
-  return { root, levels, totalWidth: leafCounter * LEAF_SPACING };
+  // The pass above gives a sensible left-to-right ORDER per row (it follows
+  // tree structure), but not even SPACING — leaves interleave across depths
+  // in one global sequence, so any single row only gets a scattered subset
+  // of it, and internal rows (averaged from children) inherit that unevenness.
+  // Re-space every row uniformly across a shared width, keeping that order.
+  let maxRowCount = 1;
+  for (const lvl of levels) maxRowCount = Math.max(maxRowCount, lvl.length);
+  const totalWidth = Math.max(1, maxRowCount - 1) * LEAF_SPACING;
+  evenlySpaceLevels(levels, totalWidth);
+
+  return { root, levels, totalWidth };
+}
+
+// Redistributes each row's nodes uniformly across [0, totalWidth], preserving
+// the left-to-right order they're already sorted in.
+function evenlySpaceLevels(levels, totalWidth){
+  for (const arr of levels){
+    const n = arr.length;
+    if (n === 0) continue;
+    if (n === 1){ arr[0].x = totalWidth / 2; continue; }
+    for (let i = 0; i < n; i++){
+      arr[i].x = (i / (n - 1)) * totalWidth;
+    }
+  }
 }
 
 // binary search: first index with arr[i].x >= target
