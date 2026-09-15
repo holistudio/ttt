@@ -238,6 +238,12 @@ function fitWholeTree(){
 }
 
 function rowY(depth, rowH){ return TOP_MARGIN + depth * rowH; }
+// X-win / O-win nodes render half a row above their depth's normal row, so
+// they read as distinct from the in-progress/draw nodes at the same depth.
+function nodeY(node, rowH){
+  const y = rowY(node.depth, rowH);
+  return (node.terminal && node.winner !== 'draw') ? y - rowH / 2 : y;
+}
 function screenX(wx){ return (wx - camX) * camScale + width / 2; }
 function worldX(sx){ return (sx - width / 2) / camScale + camX; }
 
@@ -273,15 +279,15 @@ function draw(){
     for (let i = s; i < e; i++) total += arr[i].children ? arr[i].children.length : 0;
     if (total === 0) continue;
     const step = total > MAX_EDGES ? Math.ceil(total / MAX_EDGES) : 1;
-    const y0 = rowY(d, rowH), y1 = rowY(d + 1, rowH);
     let counter = 0;
     for (let i = s; i < e; i++){
       const node = arr[i];
       if (!node.children) continue;
       const sx0 = screenX(node.x);
+      const y0 = nodeY(node, rowH);
       for (const child of node.children){
         if (counter % step === 0){
-          line(sx0, y0, screenX(child.x), y1);
+          line(sx0, y0, screenX(child.x), nodeY(child, rowH));
         }
         counter++;
       }
@@ -297,10 +303,10 @@ function draw(){
     const count = e - s;
     if (count <= 0) continue;
     const step = count > MAX_PER_LEVEL ? Math.ceil(count / MAX_PER_LEVEL) : 1;
-    const y = rowY(d, rowH);
     for (let i = s; i < e; i += step){
       const node = arr[i];
       const sx = screenX(node.x);
+      const y = nodeY(node, rowH);
       if (!node.terminal){
         noStroke(); fill(15);
       } else if (node.winner === 'X'){
@@ -318,7 +324,7 @@ function draw(){
   // ---- hover detection + highlight ----
   hoveredNode = findHoveredNode(rowH);
   if (hoveredNode){
-    const y = rowY(hoveredNode.depth, rowH);
+    const y = nodeY(hoveredNode, rowH);
     const sx = screenX(hoveredNode.x);
     noFill(); stroke(20, 160); strokeWeight(1.4);
     ellipse(sx, y, Math.max(r * 2 + 8, 14), Math.max(r * 2 + 8, 14));
@@ -329,19 +335,24 @@ function draw(){
 function findHoveredNode(rowH){
   if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return null;
   const rawDepth = (mouseY - TOP_MARGIN) / rowH;
-  const d = Math.round(rawDepth);
-  if (d < 0 || d > MAX_DEPTH) return null;
-  const arr = levels[d];
-  if (!arr || arr.length === 0) return null;
   const wx = worldX(mouseX);
-  const nearest = findNearest(arr, wx);
-  if (!nearest) return null;
-  const sx = screenX(nearest.x);
-  const sy = rowY(d, rowH);
-  const dist = Math.hypot(sx - mouseX, sy - mouseY);
   const r = constrain(RADIUS_WORLD * camScale, 1, 9);
   const threshold = Math.max(9, r + 7);
-  return dist <= threshold ? nearest : null;
+
+  // Win nodes render half a row above their depth, so a given mouseY could
+  // be closest to either the row at floor(rawDepth) or ceil(rawDepth).
+  let best = null, bestDist = Infinity;
+  for (const d of new Set([Math.floor(rawDepth), Math.ceil(rawDepth)])){
+    if (d < 0 || d > MAX_DEPTH) continue;
+    const arr = levels[d];
+    if (!arr || arr.length === 0) continue;
+    const nearest = findNearest(arr, wx);
+    if (!nearest) continue;
+    const sx = screenX(nearest.x), sy = nodeY(nearest, rowH);
+    const dist = Math.hypot(sx - mouseX, sy - mouseY);
+    if (dist < bestDist){ bestDist = dist; best = nearest; }
+  }
+  return bestDist <= threshold ? best : null;
 }
 
 /* ---- preview panel (board rendered as inline SVG for crisp lines/text) ---- */
