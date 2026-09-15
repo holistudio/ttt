@@ -85,6 +85,11 @@ def index():
     return send_from_directory(str(FRONTEND_DIR), "index.html")
 
 
+@app.route("/exploration_tree.html")
+def exploration_tree():
+    return send_from_directory(str(FRONTEND_DIR), "exploration_tree.html")
+
+
 @app.route("/api/state")
 def get_state():
     return jsonify(default_state())
