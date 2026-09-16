@@ -520,7 +520,9 @@ function mouseReleased(){
   isDragging = false;
   const moved = Math.hypot(mouseX - pressX, mouseY - pressY);
   if (moved < CLICK_MOVE_THRESHOLD){
-    pinnedNode = pinnedNode ? null : hoveredNode;
+    // Click a node to pin the reduced tree to it; click that same node again,
+    // or click empty space, to unpin. Clicking a different node re-pins to it directly.
+    pinnedNode = (hoveredNode && hoveredNode !== pinnedNode) ? hoveredNode : null;
   }
 }
 function mouseDragged(){
