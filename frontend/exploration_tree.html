@@ -77,6 +77,10 @@
   #episode-panel .sub{ font-size: 11px; color: var(--muted); margin-top: 8px; }
   #episode-panel .sub b{ color: #000; }
   #episode-slider{ width:100%; display:block; margin:0; }
+  /* Phones only — iPad (>=768px) and desktop keep the label. */
+  @media (max-width: 767px){
+    #episode-label{ display:none; }
+  }
 
   /* Shared box model so the <a> back button and the <button> MuZero toggle
      render at the exact same size — a bare button carries native OS chrome
