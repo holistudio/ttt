@@ -67,10 +67,6 @@ body {
   cursor: pointer;
 }
 
-.icon-btn:hover {
-  background: #f2f2f0;
-}
-
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -102,10 +98,6 @@ body {
   border-radius: 8px;
   padding: 16px 24px;
   cursor: pointer;
-}
-
-.menu-item:hover {
-  background: #f2f2f0;
 }
 
 .agent-picker {
@@ -146,10 +138,6 @@ body {
   font-weight: 600;
   padding: 12px 20px;
   cursor: pointer;
-}
-
-.btn:hover {
-  background: #000000;
 }
 
 .content {

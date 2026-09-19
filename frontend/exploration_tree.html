@@ -54,8 +54,6 @@
     border-radius: 7px; border: 1px solid var(--panel-border); background: #fff; color: var(--ink);
     cursor:pointer;
   }
-  #reset-btn:hover{ background:#f2f2f0; }
-
   #preview-panel{
     top:16px; right:16px; width: 200px;
     display:none;
@@ -77,15 +75,25 @@
   #episode-panel .sub b{ color: var(--ink); }
   #episode-slider{ width:100%; }
 
-  #back-btn{
-    top:16px; left:16px; width:40px; height:40px; padding:0;
+  /* Shared box model so the <a> back button and the <button> MuZero toggle
+     render at the exact same size — a bare button carries native OS chrome
+     an anchor doesn't, so appearance/box-sizing/margin are reset explicitly
+     rather than left to differ by tag default. */
+  #back-btn, #muzero-btn{
+    top:16px; width:40px; height:40px; margin:0; padding:0;
+    box-sizing:border-box;
     display:flex; align-items:center; justify-content:center;
     color: #000; text-decoration:none;
     background:#E0E0E0; border:1.5px solid #000;
     box-shadow:none; backdrop-filter:none;
+    appearance:none; -webkit-appearance:none; -moz-appearance:none;
   }
-  #back-btn:hover{ background:#E0E0E0; }
-
+  #back-btn{ left:16px; }
+  #muzero-btn{
+    left:64px;
+    font-family: inherit; font-size:18px; font-weight:700; line-height:1;
+    cursor:pointer;
+  }
   #loading{
     position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
     font-size:14px; color:#55585d; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -101,6 +109,7 @@
     <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
 </a>
+<button id="muzero-btn" class="panel" aria-label="Toggle MuZero exploration view" title="Toggle MuZero exploration view (M)">&mu;</button>
 
 <div id="preview-panel" class="panel">
   <div id="preview-svg-holder"></div>
@@ -452,6 +461,7 @@ function setup(){
   const c = createCanvas(windowWidth, windowHeight);
   c.parent(holder);
   pixelDensity(1);
+  document.getElementById('muzero-btn').addEventListener('click', toggleMuzeroMode);
   setTimeout(buildEverything, 30);
 }
 
@@ -516,12 +526,14 @@ function applyMode(fit = true){
   if (fit) fitWholeTree();
 }
 
-function keyPressed(){
+function toggleMuzeroMode(){
   if (loading) return;
-  if (key === 'm' || key === 'M'){
-    muzeroMode = !muzeroMode;
-    applyMode();
-  }
+  muzeroMode = !muzeroMode;
+  applyMode();
+}
+
+function keyPressed(){
+  if (key === 'm' || key === 'M') toggleMuzeroMode();
 }
 
 function fitWholeTree(){
