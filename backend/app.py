@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from pathlib import Path
 import numpy as np
 
@@ -65,11 +66,29 @@ RL_AGENTS = {
     "muzero": muzero_agent,
 }
 
-MUZERO_BOARD_STATES_PATH = (
-    Path(__file__).resolve().parent / "agents" / "muzero" / "board_states_eps9000-9999_log.json"
-)
-with open(MUZERO_BOARD_STATES_PATH) as f:
-    muzero_board_state_counts = json.load(f)
+MUZERO_LOG_DIR = Path(__file__).resolve().parent / "agents" / "muzero"
+MUZERO_LOG_NAME_RE = re.compile(r"^board_states_eps(\d+)-(\d+)_log\.json$")
+
+
+def load_muzero_episode_logs():
+    """Load every board_states_eps<start>-<end>_log.json in MUZERO_LOG_DIR, sorted by episode range."""
+    logs = []
+    for path in sorted(MUZERO_LOG_DIR.glob("board_states_eps*_log.json")):
+        match = MUZERO_LOG_NAME_RE.match(path.name)
+        if not match:
+            continue
+        start, end = int(match.group(1)), int(match.group(2))
+        with open(path) as f:
+            counts = json.load(f)
+        logs.append({"label": f"{start}-{end}", "start": start, "end": end, "counts": counts})
+    logs.sort(key=lambda log: log["start"])
+    return logs
+
+
+muzero_episode_logs = load_muzero_episode_logs()
+# The board states seen during the final training episodes are what's used
+# to annotate the live game's board_state_counts (see agent_move() below).
+muzero_board_state_counts = muzero_episode_logs[-1]["counts"] if muzero_episode_logs else {}
 
 def check_result(board):
     for a, b, c in WIN_LINES:
@@ -93,6 +112,11 @@ def exploration_tree():
 @app.route("/api/state")
 def get_state():
     return jsonify(default_state())
+
+
+@app.route("/api/muzero-episode-logs")
+def get_muzero_episode_logs():
+    return jsonify(muzero_episode_logs)
 
 
 def parse_state(data):
