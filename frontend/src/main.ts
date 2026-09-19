@@ -97,6 +97,14 @@ function getSelects(): { selectX: HTMLSelectElement; selectO: HTMLSelectElement 
   };
 }
 
+function openMenu(): void {
+  document.getElementById("menu-overlay")?.classList.remove("hidden");
+}
+
+function closeMenu(): void {
+  document.getElementById("menu-overlay")?.classList.add("hidden");
+}
+
 function updateNewGameVisibility(): void {
   const newGameEl = document.getElementById("new-game") as HTMLButtonElement;
   const { selectX, selectO } = getSelects();
@@ -301,6 +309,8 @@ async function init(): Promise<void> {
   selectX.addEventListener("change", updateNewGameVisibility);
   selectO.addEventListener("change", updateNewGameVisibility);
 
+  document.getElementById("menu-btn")?.addEventListener("click", openMenu);
+  document.getElementById("menu-close")?.addEventListener("click", closeMenu);
   document.getElementById("new-game")?.addEventListener("click", handleNewGame);
   document.getElementById("play-again")?.addEventListener("click", handlePlayAgain);
   document.getElementById("next-move")?.addEventListener("click", handleNextMove);

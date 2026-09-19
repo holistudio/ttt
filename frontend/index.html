@@ -10,26 +10,33 @@
   <div class="app">
     <div class="header-slot">
       <header id="topbar" class="topbar">
-        <div class="topbar-agents">
-          <div class="agent-picker">
-            <img src="static/img/cross.png" class="agent-icon" alt="X" />
-            <select id="select-x" class="agent-select">
-              <option value="" selected>select agent...</option>
-              <option value="human">human</option>
-              <option value="random">random</option>
-              <option value="mcts">mcts</option>
-              <option value="muzero">muzero</option>
-            </select>
-          </div>
-          <div class="agent-picker">
-            <img src="static/img/circle.png" class="agent-icon" alt="O" />
-            <select id="select-o" class="agent-select">
-              <option value="" selected>select agent...</option>
-              <option value="human">human</option>
-              <option value="random">random</option>
-              <option value="mcts">mcts</option>
-              <option value="muzero">muzero</option>
-            </select>
+        <div class="topbar-left">
+          <button id="menu-btn" class="icon-btn" aria-label="Menu" aria-haspopup="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 6H20M4 12H20M4 18H20" stroke="#000" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
+          <div class="topbar-agents">
+            <div class="agent-picker">
+              <img src="static/img/cross.png" class="agent-icon" alt="X" />
+              <select id="select-x" class="agent-select">
+                <option value="" selected>select agent...</option>
+                <option value="human">human</option>
+                <option value="random">random</option>
+                <option value="mcts">mcts</option>
+                <option value="muzero">muzero</option>
+              </select>
+            </div>
+            <div class="agent-picker">
+              <img src="static/img/circle.png" class="agent-icon" alt="O" />
+              <select id="select-o" class="agent-select">
+                <option value="" selected>select agent...</option>
+                <option value="human">human</option>
+                <option value="random">random</option>
+                <option value="mcts">mcts</option>
+                <option value="muzero">muzero</option>
+              </select>
+            </div>
           </div>
         </div>
         <button id="new-game" class="btn hidden">New Game</button>
@@ -57,6 +64,14 @@
       </div>
     </div>
   </div>
+
+  <div id="menu-overlay" class="menu-overlay hidden">
+    <nav class="menu-list">
+      <a class="menu-item" href="exploration_tree.html">muzero exploring tictactoe</a>
+      <button id="menu-close" class="menu-item menu-close-btn">close</button>
+    </nav>
+  </div>
+
   <script src="static/js/main.js"></script>
 </body>
 </html>

@@ -71,6 +71,12 @@ function getSelects() {
         selectO: document.getElementById("select-o"),
     };
 }
+function openMenu() {
+    document.getElementById("menu-overlay")?.classList.remove("hidden");
+}
+function closeMenu() {
+    document.getElementById("menu-overlay")?.classList.add("hidden");
+}
 function updateNewGameVisibility() {
     const newGameEl = document.getElementById("new-game");
     const { selectX, selectO } = getSelects();
@@ -248,6 +254,8 @@ async function init() {
     const { selectX, selectO } = getSelects();
     selectX.addEventListener("change", updateNewGameVisibility);
     selectO.addEventListener("change", updateNewGameVisibility);
+    document.getElementById("menu-btn")?.addEventListener("click", openMenu);
+    document.getElementById("menu-close")?.addEventListener("click", closeMenu);
     document.getElementById("new-game")?.addEventListener("click", handleNewGame);
     document.getElementById("play-again")?.addEventListener("click", handlePlayAgain);
     document.getElementById("next-move")?.addEventListener("click", handleNextMove);
