@@ -92,8 +92,8 @@ const MUZERO_BOARD_STATE_COUNTS = {"000000000":10000,"000010000":5352,"002010000
 // Tweak these to change how dramatically node size reflects MuZero visit
 // counts. Both are world-units (scaled by camera zoom, then clamped), same
 // as the rest of the layout's spacing constants.
-const MAX_NODE_RADIUS = 100;   // radius of the most-visited board state (also the hard on-screen cap at any zoom)
-const MIN_NODE_RADIUS = 1; // radius of the least-visited (but still-visited) board state
+const MAX_NODE_RADIUS = 200;   // radius of the most-visited board state (also the hard on-screen cap at any zoom)
+const MIN_NODE_RADIUS = 10; // radius of the least-visited (but still-visited) board state
 
 /* ============================================================
    Tic-Tac-Toe complete game tree — data model
@@ -337,9 +337,9 @@ let loading = true;
 // 'm' toggles between the full deduplicated game tree (every reachable
 // state) and the MuZero exploration view (visited states only, sized by
 // visit count). Both graphs are built once up front so the toggle is instant.
-let muzeroMode = true;
+let muzeroMode = false;
 let muzeroTree = null, fullTree = null;
-const UNIFORM_NODE_RADIUS = 2.4; // world-units; node size in the full-tree view, which has no visit counts to size by
+const UNIFORM_NODE_RADIUS = MIN_NODE_RADIUS; // world-units; node size in the full-tree view, which has no visit counts to size by
 
 let camX = 0, camScale = 1, minScale = 1, maxScale = 150;
 let isDragging = false;
