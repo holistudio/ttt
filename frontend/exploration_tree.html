@@ -805,6 +805,18 @@ function mouseDragged(){
   camX -= (mouseX - pmouseX) / camScale;
   camX = constrain(camX, -totalWidth * 0.2, totalWidth * 1.2);
 }
+// iOS/iPadOS Safari suppresses the synthetic mousedown/mouseup it would
+// otherwise dispatch after a touch when the canvas is touch-action:none, so
+// mousePressed/mouseReleased never fire there. Mirror them explicitly so tap
+// pinning works on touch.
+function touchStarted(event){
+  mousePressed(event);
+  return false;
+}
+function touchEnded(event){
+  mouseReleased(event);
+  return false;
+}
 function mouseWheel(event){
   if (loading || isOverlayEvent(event)) return;
   const newScale = constrain(camScale * Math.exp(-event.delta * 0.0018), minScale, maxScale);
