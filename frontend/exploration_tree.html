@@ -808,14 +808,17 @@ function mouseDragged(){
 // iOS/iPadOS Safari suppresses the synthetic mousedown/mouseup it would
 // otherwise dispatch after a touch when the canvas is touch-action:none, so
 // mousePressed/mouseReleased never fire there. Mirror them explicitly so tap
-// pinning works on touch.
+// pinning works on touch. p5 binds these at the document level (like the
+// mouse handlers above), so taps on DOM overlay controls (the mu/back
+// buttons, the slider) reach here too — for those, don't preventDefault or
+// the browser never synthesizes the button's own click event.
 function touchStarted(event){
   mousePressed(event);
-  return false;
+  return !isOverlayEvent(event);
 }
 function touchEnded(event){
   mouseReleased(event);
-  return false;
+  return !isOverlayEvent(event);
 }
 function mouseWheel(event){
   if (loading || isOverlayEvent(event)) return;
