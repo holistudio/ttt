@@ -814,11 +814,13 @@ function mouseDragged(){
 // the browser never synthesizes the button's own click event.
 function touchStarted(event){
   mousePressed(event);
-  return !isOverlayEvent(event);
+  if (isOverlayEvent(event)) return; // let the browser synthesize the tap's click
+  return false;
 }
 function touchEnded(event){
   mouseReleased(event);
-  return !isOverlayEvent(event);
+  if (isOverlayEvent(event)) return;
+  return false;
 }
 function mouseWheel(event){
   if (loading || isOverlayEvent(event)) return;
